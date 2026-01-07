@@ -1,6 +1,7 @@
 // src/Menu.tsx
 import { useEffect, useMemo, useState } from "react";
 import { categories, items, type Category, type Item } from "./menuData";
+import { publicUrl } from "./publicUrl";
 
 /** ---------------------------
  * Category icon images (public/)
@@ -20,27 +21,27 @@ import { categories, items, type Category, type Item } from "./menuData";
 function categoryIconSrc(c: Category) {
   switch (c) {
     case "All":
-      return "/category-icons/all.png";
+      return publicUrl("category-icons/all.png");
     case "BEEF BBQ":
-      return "/category-icons/beef-bbq.png";
+      return publicUrl("category-icons/beef-bbq.png");
     case "PORK BBQ":
-      return "/category-icons/pork-bbq.png";
+      return publicUrl("category-icons/pork-bbq.png");
     case "OTHER BBQ":
-      return "/category-icons/other-bbq.png";
+      return publicUrl("category-icons/other-bbq.png");
     case "HOTPOT":
-      return "/category-icons/hotpot.png";
-    case "STEW":
-      return "/category-icons/stew.png";
+      return publicUrl("category-icons/hotpot.png");
+      case "STEW":
+      return publicUrl("category-icons/stew.png");
     case "SIDEDISH":
-      return "/category-icons/sidedish.png";
+      return publicUrl("category-icons/sidedish.png");
     case "RICE":
-      return "/category-icons/rice.png";
+      return publicUrl("category-icons/rice.png");
     case "NOODLES":
-      return "/category-icons/noodles.png";
+      return publicUrl("category-icons/noodles.png");
     case "BEVERAGES":
-      return "/category-icons/beverages.png";
+      return publicUrl("category-icons/beverages.png");
     default:
-      return "/category-icons/all.png";
+      return publicUrl("category-icons/all.png");
   }
 }
 

@@ -6,6 +6,7 @@ import Menu from "./Menu";
 import Promos from "./Promos";
 import Gallery from "./Gallery";
 import Contact from "./Contact";
+import { publicUrl } from "./publicUrl";
 
 function useIsQrMenuMode() {
   const { pathname, search } = useLocation();
@@ -103,7 +104,7 @@ export default function App() {
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link to="/" className="flex items-center gap-2">
               <img
-                src="/brand/logo-mark.svg"
+                src={publicUrl("brand/logo-mark.svg")
                 alt="GANADA"
                 className="h-8 w-8 rounded-xl"
                 loading="eager"

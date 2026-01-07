@@ -1,4 +1,5 @@
 // src/menuData.ts
+import { publicUrl } from "./publicUrl";
 export type Category =
   | "All"
   | "BEEF BBQ"
@@ -46,7 +47,7 @@ export const items: Item[] = [
     name: "GALBI BONSAL",
     desc: "Boneless short ribs",
     tags: ["Best"],
-    image: { src: "/menu/galbi-bonsal.webp", alt: "GALBI BONSAL" },
+    image: { src: publicUrl("menu/galbi-bonsal.webp"), alt: "GALBI BONSAL" },
     price: { kind: "market" },
   },
   {
@@ -54,7 +55,7 @@ export const items: Item[] = [
     category: "BEEF BBQ",
     name: "SAENG GALBI",
     desc: "Bone-in short ribs",
-    image: { src: "/menu/saeng-galbi.webp", alt: "SAENG GALBI" },
+    image: { src: publicUrl("menu/saeng-galbi.webp"), alt: "SAENG GALBI" },
     price: { kind: "market" },
   },
   {
@@ -62,7 +63,7 @@ export const items: Item[] = [
     category: "BEEF BBQ",
     name: "HANWOO DEUNGSIM",
     desc: "Korean beef sirloin",
-    image: { src: "/menu/hanwoo-deungsim.webp", alt: "HANWOO DEUNGSIM" },
+    image: { src: publicUrl("menu/hanwoo-deungsim.webp"), alt: "HANWOO DEUNGSIM" },
     price: { kind: "market" },
   },
   {
@@ -70,7 +71,7 @@ export const items: Item[] = [
     category: "BEEF BBQ",
     name: "WANG GALBI",
     desc: "Short ribs marinated in soy sauce",
-    image: { src: "/menu/wang-galbi.webp", alt: "WANG GALBI" },
+    image: { src: publicUrl("menu/wang-galbi.webp"), alt: "WANG GALBI" },
     price: { kind: "market" },
   },
   {
@@ -79,7 +80,7 @@ export const items: Item[] = [
     name: "SAMGYEOPSAL",
     desc: "Pork belly",
     tags: ["Best"],
-    image: { src: "/menu/samgyeopsal.webp", alt: "SAMGYEOPSAL" },
+    image: { src: publicUrl("menu/samgyeopsal.webp"), alt: "SAMGYEOPSAL" },
     price: { kind: "market" },
   },
   {
@@ -87,7 +88,7 @@ export const items: Item[] = [
     category: "SIDEDISH",
     name: "KIMCHI JEON",
     desc: "Kimchi pancake",
-    image: { src: "/menu/kimchi-jeon.webp", alt: "KIMCHI JEON" },
+    image: { src: publicUrl("menu/kimchi-jeon.webp"), alt: "KIMCHI JEON" },
     price: { kind: "fixed", rm: 40 },
   },
 ];
