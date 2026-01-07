@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { color-scheme: dark; }
+
+.ganada-logo-font {
+  font-family: "trajan-pro-3", serif;
+  font-weight: 600;
+  font-style: normal;
+}
