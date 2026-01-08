@@ -1,5 +1,8 @@
 // src/menuData.ts
-import { publicUrl } from "./publicUrl";
+
+/** GitHub Pages(예: /menu/)에서도 public 파일이 깨지지 않게 base를 자동 반영 */
+const publicUrl = (p: string) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, "")}`;
+
 export type Category =
   | "All"
   | "BEEF BBQ"

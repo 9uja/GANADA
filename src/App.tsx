@@ -6,7 +6,9 @@ import Menu from "./Menu";
 import Promos from "./Promos";
 import Gallery from "./Gallery";
 import Contact from "./Contact";
-import { publicUrl } from "./publicUrl";
+
+/** GitHub Pages(예: /menu/)에서도 public 파일이 깨지지 않게 base를 자동 반영 */
+const publicUrl = (p: string) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, "")}`;
 
 function useIsQrMenuMode() {
   const { pathname, search } = useLocation();
@@ -104,7 +106,7 @@ export default function App() {
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link to="/" className="flex items-center gap-2">
               <img
-                src={publicUrl("brand/logo-mark.svg")
+                src= {publicUrl("brand/logo-mark.svg")}
                 alt="GANADA"
                 className="h-8 w-8 rounded-xl"
                 loading="eager"

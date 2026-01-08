@@ -1,7 +1,10 @@
 // src/Menu.tsx
+
+/** GitHub Pages(예: /menu/)에서도 public 파일이 깨지지 않게 base를 자동 반영 */
+const publicUrl = (p: string) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, "")}`;
+
 import { useEffect, useMemo, useState } from "react";
 import { categories, items, type Category, type Item } from "./menuData";
-import { publicUrl } from "./publicUrl";
 
 /** ---------------------------
  * Category icon images (public/)
