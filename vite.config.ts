@@ -1,8 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }: ConfigEnv) => ({
   plugins: [react()],
+  // Netlify/로컬: /
+  // GitHub Pages(레포명 menu): /menu/
   base: mode === "gh" ? "/menu/" : "/",
-})
+}));
