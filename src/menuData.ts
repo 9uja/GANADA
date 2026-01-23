@@ -38,7 +38,7 @@ export type Price =
   | { kind: "fixed"; rm: number }
   | { kind: "market" };
 
-export type Tag = "Best" | "Spicy" | "SOJU" | "BEER" | "WINE" | "SOFT DRINKS";
+export type Tag = "Best" | "Spicy" | "SOJU" | "BEER" | "WINE" | "SOFT DRINKS" | "RECOMMENDED";
 
 export type Item = {
   id: string;
@@ -269,7 +269,7 @@ export const items: Item[] = [
     nameKo: "돼지 국밥",
     name: "DWAEJI GUKBAP",
     desc: "Pork soup",
-    tags: ["Best"],
+    tags: ["Best", "RECOMMENDED"],
     image: { src: publicUrl("menu/stew/dwaeji-gukbap.webp"), alt: "DWAEJI GUKBAP" },
     price: { kind: "fixed", rm: 27 },
   },
@@ -652,7 +652,7 @@ export const items: Item[] = [
     nameKo: "산더미 국수",
     name: "SANDUHMI GUKSU",
     desc: "Wheat flour noodles in a light anchovy broth topped with mountain like vegetables",
-    tags: ["Best"],
+    tags: ["Best", "RECOMMENDED"],
     image: { src: publicUrl("menu/noodles/sanduhmi-guksu.webp"), alt: "SANDUHMI GUKSU" },
     price: { kind: "fixed", rm: 30 },
   },

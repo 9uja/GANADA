@@ -245,7 +245,7 @@ function BannerCarousel({
  */
 function RecommendedMenuCarousel({
   list,
-  autoMs = 2000, // ✅ 초당 n번 자동 슬라이드
+  autoMs = 3000, // ✅ 초당 n번 자동 슬라이드
 }: {
   list: Item[];
   autoMs?: number;
@@ -373,25 +373,24 @@ function RecommendedMenuCarousel({
                     />
                   </div>
 
-                  <div className="mt-3 flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex min-w-0 items-center gap-2">
-                        <h3 className="min-w-0 truncate text-base font-extrabold leading-snug text-neutral-900">
-                          {m.nameKo ?? m.name}
-                        </h3>
-                        {m.tags?.includes("Best") && (
-                          <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
-                            Best
-                          </span>
-                        )}
-                      </div>
+                  <div className="mt-3 flex flex-col items-center text-center gap-1">
+                    <div className="flex items-center justify-center gap-2">
+                      <h3 className="truncate text-xl font-extrabold leading-snug text-neutral-900">
+                        {m.nameKo ?? m.name}
+                      </h3>
 
-                      {m.nameKo && (
-                        <p className="mt-0.5 w-full truncate text-sm font-semibold text-neutral-500">
-                          {m.name}
-                        </p>
+                      {m.tags?.includes("RECOMMENDED") && (
+                        <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
+                          RECOMMENDED
+                        </span>
                       )}
                     </div>
+
+                    {m.nameKo && (
+                      <p className="truncate text-xl font-semibold text-neutral-500">
+                        {m.name}
+                      </p>
+                    )}
                   </div>
                 </Link>
               </div>
@@ -437,28 +436,26 @@ function RecommendedMenuCarousel({
                         />
                       </div>
 
-                      <div className="mt-3 flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex min-w-0 items-center gap-2">
-                            <h3 className="min-w-0 truncate text-sm font-extrabold leading-snug text-neutral-900 sm:text-base">
-                              {m.nameKo ?? m.name}
-                            </h3>
-                            {m.tags?.includes("Best") && (
-                              <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
-                                Best
-                              </span>
-                            )}
-                          </div>
+                      <div className="mt-3 flex flex-col items-center text-center gap-1">
+                        <div className="flex items-center justify-center gap-2">
+                          <h3 className="truncate text-xl font-extrabold leading-snug text-neutral-900 sm:text-xl">
+                            {m.nameKo ?? m.name}
+                          </h3>
 
-                          {m.nameKo && (
-                            <p className="mt-0.5 block w-full truncate text-xs font-semibold text-neutral-500 sm:text-sm">
-                              {m.name}
-                            </p>
+                          {m.tags?.includes("RECOMMENDED") && (
+                            <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
+                              RECOMMENDED
+                            </span>
                           )}
                         </div>
-                      </div>
 
-                      <p className="mt-2 text-xs font-semibold text-neutral-500">
+                        {m.nameKo && (
+                          <p className="truncate text-lg font-semibold text-neutral-800 sm:text-lg">
+                            {m.name}
+                          </p>
+                        )}
+                      </div>
+                      <p className="mt-2 text-xs font-semibold text-neutral-500 text-center">
                         Tap to view
                       </p>
                     </Link>
@@ -486,9 +483,9 @@ export default function Home() {
     []
   );
 
-  // Best tagged items auto
+  // RECOMMENDED tagged items auto
   const bestList = useMemo(() => {
-    const best = items.filter((it) => it.tags?.includes("Best"));
+    const best = items.filter((it) => it.tags?.includes("RECOMMENDED"));
     return best.length > 0 ? best : items.slice(0, 10);
   }, []);
 
@@ -499,7 +496,7 @@ export default function Home() {
       </FullBleed>
 
       {/* ✅ 추천메뉴만 변경됨 */}
-      <RecommendedMenuCarousel list={bestList} autoMs={2000} />
+      <RecommendedMenuCarousel list={bestList} autoMs={3000} />
 
       <section className="grid gap-3 sm:grid-cols-3">
         <Link
