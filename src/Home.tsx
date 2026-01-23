@@ -357,7 +357,7 @@ function RecommendedMenuCarousel({
             style={{ transform: `translateX(-${mIdx * 100}%)` }}
           >
             {list.map((m, idx) => (
-              <div key={`${m.category}-${m.id}-${idx}`} className="w-full shrink-0 p-3">
+              <div key={m.id} className="w-full shrink-0 p-3">
                 <Link
                   to={`/menu?item=${encodeURIComponent(m.id)}`}
                   className="block rounded-3xl bg-white"

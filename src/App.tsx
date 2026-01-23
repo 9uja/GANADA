@@ -255,7 +255,7 @@ export default function App() {
                     Menu
                   </NavLink>
                   <NavLink className={mobileNavItem} to="/promos">
-                    What’s New
+                    Promos
                   </NavLink>
                   <NavLink className={mobileNavItem} to="/contact">
                     Contact

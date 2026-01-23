@@ -1,5 +1,5 @@
 // src/Menu.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { categories, items, type Category, type Item } from "./menuData";
 
@@ -44,8 +44,6 @@ type WindowWithIdleCallback = Window & {
   ) => number;
   cancelIdleCallback?: (id: number) => void;
 };
-
-const CATEGORY_STORAGE_KEY = "ganada_menu_active_category_v1";
 
 function isCategory(v: string | null | undefined): v is Category {
   if (!v) return false;
@@ -221,7 +219,7 @@ function CategorySheet({
           </button>
         </div>
 
-        {/* ✅ 모바일에서 리스트가 길어도 스크롤 가능하도록 처리 (ALL이 상단에서 안 보이던 문제 해결) */}
+        {/* 모바일에서 리스트가 길어도 스크롤 가능하도록 처리 */}
         <div className="mt-4 flex-1 overflow-y-auto overscroll-contain pr-1">
           <div className="grid gap-2">
             {categories.map((c) => {
@@ -350,21 +348,34 @@ export default function Menu() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [active, setActive] = useState<Category>(() => {
-    const p = new URLSearchParams(location.search);
-    const fromQuery = p.get("cat");
-    if (isCategory(fromQuery)) return fromQuery;
-
-    const fromStorage = localStorage.getItem(CATEGORY_STORAGE_KEY);
-    if (isCategory(fromStorage)) return fromStorage;
-
-    return "All";
-  });
+  /**
+   * 옵션 B 정책
+   * - 메뉴 탭으로 "새로 진입(마운트)"할 때는 항상 All로 시작
+   * - 메뉴 페이지 내부에서 카테고리 이동은 유지
+   * - 메뉴를 떠났다가 다시 들어오면 다시 All
+   */
+  const [active, setActive] = useState<Category>("All");
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<Item | null>(null);
   const [showFloating, setShowFloating] = useState(false);
 
+  // init 효과에서 URL을 정리할 때, active->URL 동기화가 불필요하게 1회 더 도는 것을 방지
+  const didInitRef = useRef(false);
+
+  // ✅ 메뉴 탭 재진입(마운트) 시 cat=All 강제 (다른 query 파라미터는 유지)
+  useEffect(() => {
+    const p = new URLSearchParams(location.search);
+    if (p.get("cat") !== "All") {
+      p.set("cat", "All");
+      navigate({ pathname: location.pathname, search: `?${p.toString()}` }, { replace: true });
+    }
+
+    didInitRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // URL cat 변경(뒤로가기 등) -> active 반영
   useEffect(() => {
     const p = new URLSearchParams(location.search);
     const fromQuery = p.get("cat");
@@ -372,15 +383,15 @@ export default function Menu() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
+  // active 변경 -> URL cat 동기화 (메뉴 페이지 내부 이동 유지)
   useEffect(() => {
-    try {
-      localStorage.setItem(CATEGORY_STORAGE_KEY, active);
-    } catch {
-      // ignore
-    }
+    if (!didInitRef.current) return;
 
     const p = new URLSearchParams(location.search);
     const cur = p.get("cat");
+
+    // 초기 진입에서 cat이 없던 경우는 init effect가 처리
+    if (active === "All" && cur == null) return;
 
     if (cur !== active) {
       p.set("cat", active);
@@ -388,6 +399,46 @@ export default function Menu() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active]);
+
+  // item 파라미터가 있으면 라이트박스 오픈 (Home 추천 메뉴 링크 대응)
+  useEffect(() => {
+    const p = new URLSearchParams(location.search);
+    const itemId = p.get("item");
+
+    if (!itemId) {
+      if (lightboxItem) setLightboxItem(null);
+      return;
+    }
+
+    const found = items.find((x) => x.id === itemId);
+    if (!found) return;
+
+    if (!lightboxItem || lightboxItem.id !== found.id) {
+      preloadImage(found.image.src);
+      setLightboxItem(found);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.search]);
+
+  const openItem = (m: Item) => {
+    preloadImage(m.image.src);
+    setLightboxItem(m);
+
+    const p = new URLSearchParams(location.search);
+    if (p.get("item") !== m.id) {
+      p.set("item", m.id);
+      navigate({ pathname: location.pathname, search: `?${p.toString()}` }, { replace: true });
+    }
+  };
+
+  const closeItem = () => {
+    setLightboxItem(null);
+    const p = new URLSearchParams(location.search);
+    if (p.has("item")) {
+      p.delete("item");
+      navigate({ pathname: location.pathname, search: `?${p.toString()}` }, { replace: true });
+    }
+  };
 
   const list = useMemo(() => getItemsForCategory(active), [active]);
 
@@ -496,11 +547,8 @@ export default function Menu() {
       <div className="mt-4 grid grid-cols-2 gap-1 sm:mt-6 sm:gap-3 lg:grid-cols-3">
         {list.map((m, idx) => (
           <button
-            key={`${m.category}-${m.id}-${idx}`}
-            onClick={() => {
-              preloadImage(m.image.src);
-              setLightboxItem(m);
-            }}
+            key={`${m.category}-${m.id}`} // ✅ idx 제거
+            onClick={() => openItem(m)}
             className="rounded-3xl border border-neutral-200 bg-white p-3 text-left shadow-sm transition hover:bg-neutral-50"
             type="button"
           >
@@ -509,14 +557,13 @@ export default function Menu() {
                 src={resolveSrc(m.image.src)}
                 alt={m.image.alt}
                 className="h-full w-full object-cover"
-                loading="lazy"
+                loading={idx < 6 ? "eager" : "lazy"} // ✅ 첫 6개 eager
                 decoding="async"
               />
             </div>
 
-            {/* ✅ 모바일: desc 아래 price(2줄) → price 아래 tags */}
+            {/* 모바일: desc 아래 price(2줄) → price 아래 tags */}
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-              {/* Left */}
               <div className="min-w-0">
                 <h3 className="min-w-0 truncate text-sm font-extrabold leading-snug text-neutral-900 sm:text-base">
                   {m.nameKo ?? m.name}
@@ -535,7 +582,6 @@ export default function Menu() {
                 )}
               </div>
 
-              {/* Right (price → tags) */}
               <div className="mt-1 flex min-w-0 flex-col items-start gap-1 sm:mt-0 sm:items-end sm:text-right">
                 <div className="text-sm font-extrabold text-neutral-900">{priceLabel(m.price)}</div>
 
@@ -602,7 +648,7 @@ export default function Menu() {
         onPick={(c) => setActive(c)}
       />
 
-      <Lightbox open={!!lightboxItem} item={lightboxItem} onClose={() => setLightboxItem(null)} />
+      <Lightbox open={!!lightboxItem} item={lightboxItem} onClose={closeItem} />
     </div>
   );
 }
