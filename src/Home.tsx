@@ -237,15 +237,24 @@ function BannerCarousel({
   );
 }
 
-/** 추천메뉴: 모바일 = 1장 + 좌우 이동 + 자동재생(항상 ON) / 데스크탑 = 멀티카드 스크롤 */
+/**
+ * ✅ 추천메뉴
+ * - 모바일(sm:hidden): 1개씩 보임 + 1개씩 슬라이드 + 자동슬라이드(1초)
+ * - 데스크탑(sm:block): 2개씩 보임(페이지당 2개) + 2개씩 슬라이드(페이지 단위) + 자동슬라이드(1초)
+ * - 투명 버튼(CarouselNavButton) 제거 금지: 모바일/데스크탑 모두 유지
+ */
 function RecommendedMenuCarousel({
   list,
-  autoMs = 3800,
+  autoMs = 2000, // ✅ 초당 n번 자동 슬라이드
 }: {
   list: Item[];
   autoMs?: number;
 }) {
-  // ---------- Mobile: one card per view + autoplay always ON ----------
+  if (list.length === 0) return null;
+
+  // ---------------------------
+  // Mobile: 1개씩 (item 단위)
+  // ---------------------------
   const [mIdx, setMIdx] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
@@ -261,47 +270,70 @@ function RecommendedMenuCarousel({
 
   useEffect(() => {
     if (list.length <= 1) return;
-    const t = window.setInterval(
-      () => setMIdx((v) => (v + 1) % list.length),
-      autoMs
-    );
+    const t = window.setInterval(() => {
+      setMIdx((v) => (v + 1) % list.length);
+    }, autoMs);
     return () => window.clearInterval(t);
   }, [list.length, autoMs]);
 
-  // ---------- Desktop scroller ----------
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const scrollByPage = (dir: -1 | 1) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const delta = Math.max(220, Math.floor(el.clientWidth * 0.9));
-    el.scrollBy({ left: dir * delta, behavior: "smooth" });
-  };
+  // ---------------------------
+  // Desktop: 2개씩 (page 단위)
+  // ---------------------------
+  const pages = useMemo(() => {
+    const out: Item[][] = [];
+    for (let i = 0; i < list.length; i += 2) out.push(list.slice(i, i + 2));
+    return out;
+  }, [list]);
 
-  if (list.length === 0) return null;
+  const [dPage, setDPage] = useState(0);
+
+  const goDesktop = (next: number) => {
+    const n = pages.length;
+    if (n === 0) return;
+    const v = ((next % n) + n) % n;
+    setDPage(v);
+  };
+  const prevDesktop = () => goDesktop(dPage - 1);
+  const nextDesktop = () => goDesktop(dPage + 1);
+
+  // 데스크탑 자동 슬라이드: 페이지 단위(=2개씩 이동)
+  useEffect(() => {
+    if (pages.length <= 1) return;
+    const t = window.setInterval(() => {
+      setDPage((v) => (v + 1) % pages.length);
+    }, autoMs);
+    return () => window.clearInterval(t);
+  }, [pages.length, autoMs]);
+
+  // list/paging 변경 시 index 안전 보정
+  useEffect(() => {
+    if (mIdx >= list.length) setMIdx(0);
+  }, [list.length, mIdx]);
+
+  useEffect(() => {
+    if (dPage >= pages.length) setDPage(0);
+  }, [pages.length, dPage]);
 
   return (
     <section className="bg-white p-6 shadow-sm sm:p-8">
-      <div className="flex items-end justify-between gap-3">
-        <div>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-2xl">
             RECOMMENDED
           </h2>
-          <p className="mt-1 text-sm text-neutral-600">
-            <span className="font-extrabold text-neutral-900">Best</span> 태그 메뉴 자동 노출
-          </p>
         </div>
 
-        {/* Desktop buttons (icon removed) */}
+        {/* Desktop buttons (icon removed) - 제거 금지 */}
         <div className="hidden items-center gap-2 sm:flex">
-          <CarouselNavButton ariaLabel="이전" onClick={() => scrollByPage(-1)} size="sm" />
-          <CarouselNavButton ariaLabel="다음" onClick={() => scrollByPage(1)} size="sm" />
+          <CarouselNavButton ariaLabel="이전" onClick={prevDesktop} size="sm" />
+          <CarouselNavButton ariaLabel="다음" onClick={nextDesktop} size="sm" />
         </div>
       </div>
 
-      {/* ---------------- MOBILE ---------------- */}
-      <div className="relative mt-5 sm:hidden">
+      {/* ---------------- MOBILE (1개씩) ---------------- */}
+      <div className="relative mt-5 sm:hidden flex justify-center">
         <div
-          className="relative overflow-hidden rounded-3xl border border-neutral-200 bg-white"
+          className="relative w-full max-w-[720px] overflow-hidden rounded-3xl border border-neutral-200 bg-white"
           onTouchStart={(e) => {
             touchStartX.current = e.touches[0]?.clientX ?? null;
             touchDeltaX.current = 0;
@@ -365,11 +397,9 @@ function RecommendedMenuCarousel({
               </div>
             ))}
           </div>
-
-          {/* ✅ 추천메뉴 모바일 dots 제거 완료 */}
         </div>
 
-        {/* buttons outside (icon removed) */}
+        {/* 모바일 좌/우 버튼 유지 (제거 금지) */}
         <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-10 flex items-center justify-between">
           <div className="pointer-events-auto -translate-x-[40%]">
             <CarouselNavButton ariaLabel="이전" onClick={prevMobile} size="sm" />
@@ -380,61 +410,66 @@ function RecommendedMenuCarousel({
         </div>
       </div>
 
-      {/* ---------------- DESKTOP ---------------- */}
-      <div className="relative mt-5 hidden sm:block">
-        <div
-          ref={scrollerRef}
-          className={[
-            "flex gap-3 overflow-x-auto scroll-smooth pb-1",
-            "snap-x snap-mandatory",
-            "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-          ].join(" ")}
-        >
-          {list.map((m, idx) => (
-            <Link
-              key={`${m.category}-${m.id}-${idx}`}
-              to={`/menu?item=${encodeURIComponent(m.id)}`}
-              className={[
-                "snap-start shrink-0",
-                "w-[260px] lg:w-[300px]",
-                "rounded-3xl border border-neutral-200 bg-white p-3 shadow-sm transition hover:bg-neutral-50",
-              ].join(" ")}
-            >
-              <div className="aspect-[4/3] overflow-hidden rounded-2xl">
-                <img
-                  src={resolveSrc(m.image.src)}
-                  alt={m.image.alt}
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                  draggable={false}
-                />
-              </div>
+      {/* ---------------- DESKTOP (2개씩, 2개씩 슬라이드) ---------------- */}
+      <div className="relative mt-5 hidden sm:flex justify-center">
+        <div className="w-full max-w-5xl overflow-hidden rounded-3xl bg-white">
+          <div
+            className="flex transition-transform duration-500"
+            style={{ transform: `translateX(-${dPage * 100}%)` }}
+          >
+            {pages.map((page, pageIdx) => (
+              <div key={`page-${pageIdx}`} className="w-full shrink-0 p-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {page.map((m, idx) => (
+                    <Link
+                      key={`${m.category}-${m.id}-${idx}`}
+                      to={`/menu?item=${encodeURIComponent(m.id)}`}
+                      className="rounded-3xl border border-neutral-200 bg-white p-3 shadow-sm transition hover:bg-neutral-50"
+                    >
+                      <div className="aspect-[4/3] overflow-hidden rounded-2xl">
+                        <img
+                          src={resolveSrc(m.image.src)}
+                          alt={m.image.alt}
+                          className="h-full w-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                          draggable={false}
+                        />
+                      </div>
 
-              <div className="mt-3 flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex min-w-0 items-center gap-2">
-                    <h3 className="min-w-0 truncate text-sm font-extrabold leading-snug text-neutral-900 sm:text-base">
-                      {m.nameKo ?? m.name}
-                    </h3>
-                    {m.tags?.includes("Best") && (
-                      <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
-                        Best
-                      </span>
-                    )}
-                  </div>
+                      <div className="mt-3 flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex min-w-0 items-center gap-2">
+                            <h3 className="min-w-0 truncate text-sm font-extrabold leading-snug text-neutral-900 sm:text-base">
+                              {m.nameKo ?? m.name}
+                            </h3>
+                            {m.tags?.includes("Best") && (
+                              <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
+                                Best
+                              </span>
+                            )}
+                          </div>
 
-                  {m.nameKo && (
-                    <p className="mt-0.5 block w-full truncate text-xs font-semibold text-neutral-500 sm:text-sm">
-                      {m.name}
-                    </p>
-                  )}
+                          {m.nameKo && (
+                            <p className="mt-0.5 block w-full truncate text-xs font-semibold text-neutral-500 sm:text-sm">
+                              {m.name}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <p className="mt-2 text-xs font-semibold text-neutral-500">
+                        Tap to view
+                      </p>
+                    </Link>
+                  ))}
+
+                  {/* 홀수 개수 보정(2칸 유지) */}
+                  {page.length === 1 && <div className="rounded-3xl border border-transparent p-3" />}
                 </div>
               </div>
-
-              <p className="mt-2 text-xs font-semibold text-neutral-500">Tap to view</p>
-            </Link>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -463,7 +498,8 @@ export default function Home() {
         <BannerCarousel slides={slides} />
       </FullBleed>
 
-      <RecommendedMenuCarousel list={bestList} autoMs={3800} />
+      {/* ✅ 추천메뉴만 변경됨 */}
+      <RecommendedMenuCarousel list={bestList} autoMs={2000} />
 
       <section className="grid gap-3 sm:grid-cols-3">
         <Link
