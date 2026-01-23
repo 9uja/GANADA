@@ -1,6 +1,6 @@
 // src/App.tsx
 import { Link, NavLink, Route, Routes, useLocation } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Home from "./Home";
 import Menu from "./Menu";
 import Promos from "./Promos";
@@ -85,6 +85,26 @@ function useAutoHideHeader(enabled: boolean) {
   return hidden;
 }
 
+/**
+ * ✅ 중요: App() 내부에서 ContentWrap을 선언하면
+ * App이 리렌더링될 때마다 ContentWrap "타입"이 바뀌어
+ * 하위 트리가 언마운트/리마운트 됩니다.
+ * (Menu state가 스크롤 시 All로 리셋되던 핵심 원인)
+ */
+function ContentWrap({
+  isQr,
+  pathname,
+  children,
+}: {
+  isQr: boolean;
+  pathname: string;
+  children: ReactNode;
+}) {
+  // HOME: remove wrapper for full-bleed carousel
+  if (!isQr && pathname === "/") return <>{children}</>;
+  return <div className="mx-auto max-w-6xl">{children}</div>;
+}
+
 /** --- icons --- */
 function MenuIcon({ className = "" }: { className?: string }) {
   return (
@@ -145,11 +165,11 @@ export default function App() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMobileNavOpen(false);
     };
-    window.addEventListener("keydown", onKey);
 
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
+    window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
@@ -164,12 +184,6 @@ export default function App() {
       : pathname === "/menu"
         ? "px-4 pt-4 pb-10 sm:pt-5"
         : "px-4 py-10";
-
-  const ContentWrap = ({ children }: { children: React.ReactNode }) => {
-    // HOME: remove wrapper for full-bleed carousel
-    if (!isQr && pathname === "/") return <>{children}</>;
-    return <div className="mx-auto max-w-6xl">{children}</div>;
-  };
 
   return (
     <div className="min-h-dvh bg-white text-neutral-900">
@@ -229,25 +243,27 @@ export default function App() {
                 </a>
               </div>
 
-              {/* Mobile */}
+              {/* Mobile hamburger */}
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white p-2.5 hover:bg-neutral-50 md:hidden"
+                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-neutral-200 bg-white md:hidden"
                 aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
-                aria-expanded={mobileNavOpen}
-                aria-controls="mobile-nav"
                 onClick={() => setMobileNavOpen((v) => !v)}
               >
-                {mobileNavOpen ? <CloseIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+                {mobileNavOpen ? (
+                  <CloseIcon className="h-6 w-6 text-neutral-900" />
+                ) : (
+                  <MenuIcon className="h-6 w-6 text-neutral-900" />
+                )}
               </button>
             </div>
           </div>
 
-          {/* Mobile menu panel */}
+          {/* Mobile nav */}
           {mobileNavOpen && (
-            <div className="md:hidden border-t border-neutral-200 bg-white">
-              <div id="mobile-nav" className="mx-auto max-w-6xl px-4 py-4">
-                <div className="grid gap-2">
+            <div className="border-t border-neutral-200 bg-white px-4 pb-4 md:hidden">
+              <div className="mx-auto max-w-6xl py-3">
+                <nav className="grid gap-2">
                   <NavLink className={mobileNavItem} to="/">
                     Home
                   </NavLink>
@@ -260,20 +276,16 @@ export default function App() {
                   <NavLink className={mobileNavItem} to="/contact">
                     Contact
                   </NavLink>
-                </div>
+                </nav>
 
-                <div className="mt-4 flex items-center justify-between gap-2">
-                  <a
-                    className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-neutral-900 px-5 text-base font-extrabold text-white hover:opacity-90"
-                    href="https://wa.me/60123456789"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    WhatsApp
-                  </a>
-                </div>
-
-                <p className="mt-3 text-center text-xs text-neutral-500">Press ESC to close</p>
+                <a
+                  className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-neutral-900 text-base font-extrabold text-white hover:opacity-90"
+                  href="https://wa.me/60123456789"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  WhatsApp
+                </a>
               </div>
             </div>
           )}
@@ -281,7 +293,7 @@ export default function App() {
       )}
 
       <main className={mainClass}>
-        <ContentWrap>
+        <ContentWrap isQr={isQr} pathname={pathname}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/menu" element={<Menu />} />
