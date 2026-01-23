@@ -26,6 +26,25 @@ function priceSubLabel(p: Item["price"]) {
   return null;
 }
 
+/** Display labels (keep internal category values stable) */
+function categoryLabel(c: Category) {
+  return c === "All" ? "ALL" : c;
+}
+
+/** requestIdleCallback typing (avoid `any`) */
+type IdleDeadline = {
+  didTimeout: boolean;
+  timeRemaining: () => number;
+};
+
+type WindowWithIdleCallback = Window & {
+  requestIdleCallback?: (
+    cb: (deadline: IdleDeadline) => void,
+    opts?: { timeout: number }
+  ) => number;
+  cancelIdleCallback?: (id: number) => void;
+};
+
 const CATEGORY_STORAGE_KEY = "ganada_menu_active_category_v1";
 
 function isCategory(v: string | null | undefined): v is Category {
@@ -184,7 +203,7 @@ function CategorySheet({
       onClick={onClose}
     >
       <div
-        className="fixed inset-x-0 bottom-0 z-[999] mx-auto w-full max-w-6xl rounded-t-3xl border border-neutral-200 bg-white p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.25)]"
+        className="fixed inset-x-0 bottom-0 z-[999] mx-auto flex max-h-[85vh] w-full max-w-6xl flex-col rounded-t-3xl border border-neutral-200 bg-white p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.25)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-neutral-200" />
@@ -202,33 +221,36 @@ function CategorySheet({
           </button>
         </div>
 
-        <div className="mt-4 grid gap-2">
-          {categories.map((c) => {
-            const isActive = c === active;
-            return (
-              <button
-                key={c}
-                onClick={() => {
-                  onPick(c);
-                  onClose();
-                }}
-                className={[
-                  "flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition",
-                  isActive
-                    ? "border-neutral-900 bg-white text-neutral-900"
-                    : "border-neutral-200 bg-white hover:bg-neutral-50",
-                ].join(" ")}
-                type="button"
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <CategoryIcon c={c} className="h-5 w-5 shrink-0" colorClass="bg-neutral-900" />
-                  <span className="truncate text-sm font-extrabold">{c}</span>
-                </span>
+        {/* ✅ 모바일에서 리스트가 길어도 스크롤 가능하도록 처리 (ALL이 상단에서 안 보이던 문제 해결) */}
+        <div className="mt-4 flex-1 overflow-y-auto overscroll-contain pr-1">
+          <div className="grid gap-2">
+            {categories.map((c) => {
+              const isActive = c === active;
+              return (
+                <button
+                  key={c}
+                  onClick={() => {
+                    onPick(c);
+                    onClose();
+                  }}
+                  className={[
+                    "flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition",
+                    isActive
+                      ? "border-neutral-900 bg-white text-neutral-900"
+                      : "border-neutral-200 bg-white hover:bg-neutral-50",
+                  ].join(" ")}
+                  type="button"
+                >
+                  <span className="flex min-w-0 items-center gap-3">
+                    <CategoryIcon c={c} className="h-5 w-5 shrink-0" colorClass="bg-neutral-900" />
+                    <span className="truncate text-sm font-extrabold">{categoryLabel(c)}</span>
+                  </span>
 
-                {isActive && <span className="text-xs font-extrabold opacity-70">Selected</span>}
-              </button>
-            );
-          })}
+                  {isActive && <span className="text-xs font-extrabold opacity-70">Selected</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <p className="mt-4 text-xs text-neutral-500">
@@ -369,6 +391,12 @@ export default function Menu() {
 
   const list = useMemo(() => getItemsForCategory(active), [active]);
 
+  const sheetCategories = useMemo<Category[]>(() => {
+    // Defensive: ensure "All" is always present (and first) in the sheet list.
+    const base = categories as Category[];
+    return base.includes("All") ? base : (["All", ...base] as Category[]);
+  }, []);
+
   useEffect(() => {
     const first = getItemsForCategory(active).map((x) => x.image.src);
     preloadImagesBatch(first, 8);
@@ -378,10 +406,10 @@ export default function Menu() {
   useEffect(() => {
     const srcs = getItemsForCategory(active).map((x) => x.image.src);
     const run = () => preloadImagesBatch(srcs, 10);
-    const w = window as any;
+    const w = window as WindowWithIdleCallback;
 
     if (typeof w.requestIdleCallback === "function") {
-      const id = w.requestIdleCallback(run, { timeout: 700 });
+      const id = w.requestIdleCallback(() => run(), { timeout: 700 });
       return () => w.cancelIdleCallback?.(id);
     } else {
       const t = window.setTimeout(run, 120);
@@ -439,7 +467,7 @@ export default function Menu() {
           type="button"
         >
           <CategoryIcon c={active} className="h-5 w-5 shrink-0" colorClass="bg-neutral-900" />
-          <span className="max-w-[24ch] truncate">{active}</span>
+          <span className="max-w-[24ch] truncate">{categoryLabel(active)}</span>
           <ChevronDownIcon className="h-5 w-5 text-neutral-500" />
         </button>
       </div>
@@ -456,7 +484,7 @@ export default function Menu() {
               <span className="min-w-0">
                 <span className="block text-xs font-semibold text-neutral-500">Category</span>
                 <span className="block truncate text-sm font-extrabold text-neutral-900">
-                  {active}
+                  {categoryLabel(active)}
                 </span>
               </span>
             </span>
@@ -562,14 +590,14 @@ export default function Menu() {
           type="button"
         >
           <CategoryIcon c={active} className="h-5 w-5 shrink-0" colorClass="bg-neutral-900" />
-          <span className="max-w-[42vw] truncate">{active}</span>
+          <span className="max-w-[42vw] truncate">{categoryLabel(active)}</span>
         </button>
       )}
 
       <CategorySheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
-        categories={categories}
+        categories={sheetCategories}
         active={active}
         onPick={(c) => setActive(c)}
       />
