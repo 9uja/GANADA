@@ -17,6 +17,19 @@ export type Category =
   | "NOODLES"
   | "BEVERAGES";
 
+export type Item = {
+  id: string;
+  category: Exclude<Category, "All">;
+  name: string;
+  nameKo?: string;
+  desc?: string;
+  image: { src: string; alt: string };
+  price:
+    | { kind: "fixed"; rm: number }
+    | { kind: "market" };
+  tags?: string[];
+};
+
 export const categories: Category[] = [
   "All",
   "BEEF BBQ",
@@ -29,12 +42,9 @@ export const categories: Category[] = [
   "SIDEDISH",
   "RICE",
   "NOODLES",
-  "BEVERAGES"
+  "BEVERAGES",
 ];
 
-export type Price =
-  | { kind: "fixed"; rm: number }
-  | { kind: "market" };
 
 export type Item = {
   id: string;
@@ -42,7 +52,7 @@ export type Item = {
   nameKo?: string;    // KO (optional)
   desc?: string;
   category: Exclude<Category, "All">;
-  tags?: ("🔥Best" | "🌶️Spicy"| "SOJU" | "BEER" | "WINE" | "SOFT DRINKS")[];
+  tags?: ("Best" | "Spicy"| "SOJU" | "BEER" | "WINE" | "SOFT DRINKS")[];
   image: { src: string; alt: string };
   price: Price;
 };
@@ -55,7 +65,7 @@ export const items: Item[] = [
     nameKo: "갈비본살",
     name: "GALBI BONSAL",
     desc: "Boneless short ribs",
-    tags: ["🔥Best"],
+    tags: ["Best"],
     image: { src: publicUrl("menu/beef/galbi-bonsal.webp"), alt: "GALBI BONSAL" },
     price: { kind: "market" },
   },
@@ -87,7 +97,7 @@ export const items: Item[] = [
     price: { kind: "market" },
   },
   {
-    id: "beef-bbq-4",
+    id: "beef-bbq-5",
     category: "BEEF BBQ",
     nameKo: "우삼겹",
     name: "WOOSEUL GUI",
@@ -103,7 +113,7 @@ export const items: Item[] = [
     nameKo: "항정살",
     name: "HANGJUNGSAL",
     desc: "Pork belly",
-    tags: ["🔥Best"],
+    tags: ["Best"],
     image: { src: publicUrl("menu/pork/hangjungsal.webp"), alt: "HANGJUNGSAL" },
     price: { kind: "market" },
   },
@@ -160,7 +170,7 @@ export const items: Item[] = [
     nameKo: "생 블랙타이거 새우찜",
     name: "LIVE BLACK TIGER PRAWN JJIM",
     desc: "Steamed live black tiger prawns",
-    tags: ["🔥Best"],
+    tags: ["Best"],
     image: { src: publicUrl("menu/live/live-black-tiger-prawns.webp"), alt: "LIVE BLACK TIGER PRAWN JJIM" },
     price: { kind: "market" },
   },
@@ -172,7 +182,7 @@ export const items: Item[] = [
     nameKo: "양갈비",
     name: "YANG GALBI",
     desc: "Lamb rack",
-    image: { src: publicUrl("menu/other/dak-galbi.webp"), alt: "DAN GALBI" },
+    image: { src: publicUrl("menu/other/yang-galbi.webp"), alt: "YANG GALBI" },
     price: { kind: "market" },
   },
   {
@@ -181,7 +191,7 @@ export const items: Item[] = [
     nameKo: "닭갈비",
     name: "DAK GALBI",
     desc: "Chicken marinated in spicy chili sauce",
-    image: { src: publicUrl("menu/other/dak-galbi.webp"), alt: "DAN GALBI" },
+    image: { src: publicUrl("menu/other/dak-galbi.webp"), alt: "DAK GALBI" },
     price: { kind: "market" },
   },
   {
@@ -237,7 +247,7 @@ export const items: Item[] = [
     nameKo: "김치 전골",
     name: "KIMCHI JEONGOL",
     desc: "Spicy hot pot with kimchi, pork,tofu, rice cake and sari (ramen noodles)",
-    image: { src: publicUrl("menu/hotpot/kimchi-jjim.webp"), alt: "KIMCHI JJIM" },
+    image: { src: publicUrl("menu/hotpot/kimchi-jeongol.webp"), alt: "KIMCHI JEONGOL" },
     price: { kind: "fixed", rm: 80 },
   },
   {
@@ -265,6 +275,7 @@ export const items: Item[] = [
     nameKo: "돼지 국밥",
     name: "DWAEJI GUKBAP",
     desc: "Pork soup",
+    tags: ["Best"],
     image: { src: publicUrl("menu/stew/dwaeji-gukbap.webp"), alt: "DWAEJI GUKBAP" },
     price: { kind: "fixed", rm: 27 },
   },
@@ -341,7 +352,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 40 },
   },
   {
-    id: "stew-9",
+    id: "stew-10",
     category: "STEW",
     nameKo: "갈비탕",
     name: "GALBI TANG",
@@ -469,7 +480,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 70 },
   },
   {
-    id: "side-8",
+    id: "side-9",
     category: "SIDEDISH",
     nameKo: "육회",
     name: "YUK HOE",
@@ -478,7 +489,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 70 },
   },
   {
-    id: "side-9",
+    id: "side-10",
     category: "SIDEDISH",
     nameKo: "두부 김치",
     name: "DUBU KIMCHI",
@@ -487,7 +498,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 60 },
   },
   {
-    id: "side-10",
+    id: "side-11",
     category: "SIDEDISH",
     nameKo: "보쌈",
     name: "BOSSAM",
@@ -496,7 +507,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 60 },
   },
   {
-    id: "side-11",
+    id: "side-12",
     category: "SIDEDISH",
     nameKo: "마늘 보쌈",
     name: "MANEUL BOSSAM",
@@ -505,7 +516,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 65 },
   },
   {
-    id: "side-12",
+    id: "side-13",
     category: "SIDEDISH",
     nameKo: "제육볶음",
     name: "JEYUK BOKKEUM",
@@ -514,7 +525,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 60 },
   },
   {
-    id: "side-13",
+    id: "side-14",
     category: "SIDEDISH",
     nameKo: "잡채",
     name: "JAPCHAE",
@@ -647,6 +658,7 @@ export const items: Item[] = [
     nameKo: "산더미 국수",
     name: "SANDUHMI GUKSU",
     desc: "Wheat flour noodles in a light anchovy broth topped with mountain like vegetables",
+    tags: ["Best"],
     image: { src: publicUrl("menu/noodles/sanduhmi-guksu.webp"), alt: "SANDUHMI GUKSU" },
     price: { kind: "fixed", rm: 30 },
   },
@@ -733,7 +745,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 5 },
   },
   {
-    id: "beverages-9",  
+    id: "beverages-10",  
     category: "BEVERAGES",
     nameKo: "스프라이트",
     name: "SPRITE",
@@ -742,7 +754,7 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 5 },
   },
   {
-    id: "beverages-9",  
+    id: "beverages-11",  
     category: "BEVERAGES",
     nameKo: "100 플러스",
     name: "100 PLUS",
@@ -751,13 +763,13 @@ export const items: Item[] = [
     price: { kind: "fixed", rm: 5 },
   },
   {
-    id: "beverages-9",  
+    id: "beverages-12",  
     category: "BEVERAGES",
     nameKo: "갈아만든 배",
     name: "GALAMANDEUNBAE",
     desc: "Korean pear juice",
     tags: ["SOFT DRINKS"],
     image: { src: publicUrl("menu/beverages/galamandeunbae.webp"), alt: "GALAMANDEUNBAE" },
-    price: { kind: "fixed", rm: 5 },
+    price: { kind: "fixed", rm: 7 },
   }
 ];
