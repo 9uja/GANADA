@@ -422,7 +422,7 @@ export default function Menu() {
   const showMarketNote = isBbqGroup && list.some((x) => x.price.kind === "market");
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-4 pb-10">
+    <div className="mx-auto max-w-6xl pt-2 pb-8 sm:px-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-3xl">
@@ -465,7 +465,7 @@ export default function Menu() {
         </div>
       )}
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-4 grid grid-cols-2 gap-1 sm:mt-6 sm:gap-3 lg:grid-cols-3">
         {list.map((m, idx) => (
           <button
             key={`${m.category}-${m.id}-${idx}`}
@@ -476,7 +476,6 @@ export default function Menu() {
             className="rounded-3xl border border-neutral-200 bg-white p-3 text-left shadow-sm transition hover:bg-neutral-50"
             type="button"
           >
-            {/* ✅ 이미지 구분 보더 제거: border class 제거 */}
             <div className="aspect-[4/3] overflow-hidden rounded-2xl">
               <img
                 src={resolveSrc(m.image.src)}
@@ -487,27 +486,13 @@ export default function Menu() {
               />
             </div>
 
+            {/* ✅ 모바일: desc 아래 price(2줄) → price 아래 tags */}
             <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+              {/* Left */}
               <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-2">
-                  <h3 className="min-w-0 truncate text-sm font-extrabold leading-snug text-neutral-900 sm:text-base">
-                    {m.nameKo ?? m.name}
-                  </h3>
-
-                  {m.tags?.map((t) => (
-                    <span
-                      key={t}
-                      className={[
-                        "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-extrabold",
-                        t === "Best"
-                          ? "bg-amber-400 text-neutral-950"
-                          : "border border-neutral-200 bg-white text-neutral-700",
-                      ].join(" ")}
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
+                <h3 className="min-w-0 truncate text-sm font-extrabold leading-snug text-neutral-900 sm:text-base">
+                  {m.nameKo ?? m.name}
+                </h3>
 
                 {m.nameKo && (
                   <p className="mt-0.5 block w-full truncate text-xs font-semibold text-neutral-500 sm:text-sm">
@@ -522,11 +507,33 @@ export default function Menu() {
                 )}
               </div>
 
-              <div className="flex items-baseline justify-between gap-2 sm:flex-col sm:items-end sm:text-right">
+              {/* Right (price → tags) */}
+              <div className="mt-1 flex min-w-0 flex-col items-start gap-1 sm:mt-0 sm:items-end sm:text-right">
                 <div className="text-sm font-extrabold text-neutral-900">{priceLabel(m.price)}</div>
+
                 {priceSubLabel(m.price) && (
                   <div className="text-xs font-semibold text-neutral-500">
                     {priceSubLabel(m.price)}
+                  </div>
+                )}
+
+                {!!m.tags?.length && (
+                  <div className="mt-1 flex min-w-0 flex-wrap gap-1.5 sm:justify-end">
+                    {m.tags.map((t) => (
+                      <span
+                        key={t}
+                        className={[
+                          "max-w-full rounded-full px-2 py-0.5 text-[11px] font-extrabold",
+                          "overflow-hidden text-ellipsis whitespace-nowrap",
+                          t === "Best"
+                            ? "bg-amber-400 text-neutral-950"
+                            : "border border-neutral-200 bg-white text-neutral-700",
+                        ].join(" ")}
+                        title={t}
+                      >
+                        {t}
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>
