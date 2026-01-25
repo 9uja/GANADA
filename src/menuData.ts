@@ -59,7 +59,7 @@ export const items: Item[] = [
     nameKo: "갈비본살",
     name: "GALBI BONSAL",
     desc: "Boneless short ribs",
-    tags: ["Best"],
+    tags: ["Best", "RECOMMENDED"],
     image: { src: publicUrl("menu/beef/galbi-bonsal.webp"), alt: "GALBI BONSAL" },
     price: { kind: "market" },
   },
