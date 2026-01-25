@@ -147,17 +147,17 @@ function BannerCarousel({
     }
     return null;
   };
-
+// 최상단 배너 캐러셀
   return (
     <section
       className="bg-neutral-950"
       aria-roledescription="carousel"
       aria-label="Top banners"
     >
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="relative overflow-hidden rounded-none sm:rounded-3xl">
+      <div className="mx-auto">
+        <div className="relative overflow-hidden rounded-none">
           <div
-            className="relative h-[735px] sm:h-[380px] lg:h-[380px]"
+            className="relative h-[500px] sm:h-[540px] lg:h-[540px]"
             onTouchStart={(e) => {
               touchStartX.current = e.touches[0]?.clientX ?? null;
               touchDeltaX.current = 0;
@@ -230,8 +230,6 @@ function BannerCarousel({
             </div>
           </div>
         </div>
-
-        <div className="h-6" />
       </div>
     </section>
   );
