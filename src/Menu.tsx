@@ -419,8 +419,8 @@ export default function Menu() {
   return (
     <div className="mx-auto max-w-6xl px-0 pb-8 sm:px-0">
       {/* 상단 카테고리: 버블 + 가로 스크롤 + 우측 슬라이드 버튼 */}
-      <div className="mt-3">
-        <div className="relative bg-[#d9c6b6]/70 px-2 py-10 sm:px-4">
+      <div className="mt-0">
+        <div className="relative bg-[#d9c6b6]/70 px-4 py-12 sm:px-4">
           <div
             ref={catBarRef}
             className={[
@@ -443,7 +443,7 @@ export default function Menu() {
                   data-cat={String(c)}
                   onClick={() => handlePickCategory(c)}
                   className={[
-                    "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold transition",
+                    "inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-extrabold transition",
                     isActive
                       ? `${categoryAccentClass(c)} shadow-sm`
                       : "border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50",
@@ -454,13 +454,13 @@ export default function Menu() {
                     className={[
                       "flex items-center justify-center rounded-full",
                       // 모바일에서 아이콘 더 크게
-                      "h-8 w-8 sm:h-6 sm:w-6",
+                      "h-8 w-8 sm:h-8 sm:w-8",
                       isActive ? "bg-white/15" : "bg-neutral-900/5",
                     ].join(" ")}
                   >
                     <CategoryIcon
                       c={c}
-                      className="h-5 w-5 sm:h-4 sm:w-4"
+                      className="h-4 w-4 sm:h-4 sm:w-4"
                       colorClass={isActive ? "bg-white" : "bg-neutral-900"}
                     />
                   </span>

@@ -106,31 +106,69 @@ function ContentWrap({
 }
 
 /** --- icons --- */
-function MenuIcon({ className = "" }: { className?: string }) {
+/**
+ * ✅ 브랜딩 고정 버전
+ * - hover 시 배경/텍스트만 반전(버튼 배경은 dark)
+ * - 아이콘 3색(파/빨/노)은 hover/open 상태에서도 유지
+ * - open 시 햄버거 → X로 모핑(색은 그대로)
+ */
+function AnimatedMenuIcon({
+  className = "",
+  open,
+  strokeWidth = 2.8,
+  gap = 5,
+}: {
+  className?: string;
+  open: boolean;
+  strokeWidth?: number;
+  gap?: number;
+}) {
+  const yTop = 12 - gap;
+  const yMid = 12;
+  const yBot = 12 + gap;
+
+  // Tailwind 의존 제거(항상 보이게): 직접 색 지정
+  const BLUE = "#2563EB"; // blue-600
+  const RED = "#DC2626"; // red-600
+  const AMBER = "#FBBF24"; // amber-400
+
+  const base = "transition-all duration-200 ease-out origin-center";
+  const common = {
+    strokeWidth,
+    strokeLinecap: "round" as const,
+    style: { transformOrigin: "12px 12px" },
+  };
+
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <path
-        d="M4 7h16M4 12h16M4 17h16"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      {/* CLOSED LAYER (3 lines) */}
+      <g
+        className={base}
+        style={{
+          opacity: open ? 0 : 1,
+          transform: open ? "scale(0.98)" : "scale(1)",
+        }}
+      >
+        <path d={`M4 ${yTop}h16`} stroke={BLUE} {...common} />
+        <path d={`M4 ${yMid}h16`} stroke={RED} {...common} />
+        <path d={`M4 ${yBot}h16`} stroke={AMBER} {...common} />
+      </g>
+
+      {/* OPEN LAYER (X: blue + red) */}
+      <g
+        className={base}
+        style={{
+          opacity: open ? 1 : 0,
+          transform: open ? "scale(1)" : "scale(0.98)",
+        }}
+      >
+        <path d="M6 6 L18 18" stroke={BLUE} {...common} />
+        <path d="M18 6 L6 18" stroke={RED} {...common} />
+      </g>
     </svg>
   );
 }
 
-function CloseIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
-      <path
-        d="M6 6l12 12M18 6l-12 12"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 // McD-like: bigger + bolder header nav
 const desktopNavItem = ({ isActive }: { isActive: boolean }) =>
@@ -142,7 +180,9 @@ const desktopNavItem = ({ isActive }: { isActive: boolean }) =>
 const mobileNavItem = ({ isActive }: { isActive: boolean }) =>
   [
     "rounded-2xl px-4 py-4 text-base font-extrabold transition",
-    isActive ? "bg-neutral-900 text-white" : "text-neutral-900 hover:bg-neutral-50",
+    isActive
+      ? "bg-amber-400 text-neutral-950 ring-1 ring-amber-500 shadow-sm"
+      : "text-neutral-900 hover:bg-neutral-50",
   ].join(" ");
 
 export default function App() {
@@ -182,7 +222,7 @@ export default function App() {
     : pathname === "/"
       ? "px-0 py-0"
       : pathname === "/menu"
-        ? "pb-10 sm:pt-5"
+        ? "pb-0 sm:pt-0"
         : "px-4 py-10";
 
   return (
@@ -238,7 +278,8 @@ export default function App() {
               {/* Desktop */}
               <div className="hidden items-center gap-2 md:flex">
                 <a
-                  className="inline-flex h-10 items-center justify-center rounded-full bg-neutral-900 px-5 text-base font-extrabold text-white hover:opacity-90"
+                  className="inline-flex h-10 items-center justify-center rounded-full px-5 text-base font-extrabold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "#25D366" }}
                   href="https://wa.me/600328566183"
                   target="_blank"
                   rel="noreferrer"
@@ -250,15 +291,27 @@ export default function App() {
               {/* Mobile hamburger */}
               <button
                 type="button"
-                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-neutral-200 bg-white md:hidden"
+                className={[
+                  // ✅ hover 시 "배경만" 반전(다크), 아이콘 3색은 그대로 유지
+                  "group inline-flex h-12 w-12 items-center justify-center rounded-2xl",
+                  "bg-white text-neutral-900",
+                  "ring-1 ring-neutral-200 shadow-sm",
+                  "transition-all duration-200 ease-out",
+                  "hover:bg-neutral-900 hover:text-white hover:shadow-md hover:ring-neutral-900/30",
+                  "active:scale-[0.98]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2",
+                  "md:hidden",
+                ].join(" ")}
                 aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
                 onClick={() => setMobileNavOpen((v) => !v)}
               >
-                {mobileNavOpen ? (
-                  <CloseIcon className="h-6 w-6 text-neutral-900" />
-                ) : (
-                  <MenuIcon className="h-6 w-6 text-neutral-900" />
-                )}
+                <AnimatedMenuIcon
+                  open={mobileNavOpen}
+                  className="h-10 w-10"
+                  // 조절 포인트
+                  strokeWidth={2.8}
+                  gap={5}
+                />
               </button>
             </div>
           </div>
@@ -283,11 +336,12 @@ export default function App() {
                 </nav>
 
                 <a
-                  className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-neutral-900 text-base font-extrabold text-white hover:opacity-90"
+                  className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl text-base font-extrabold text-white transition-opacity hover:opacity-90"
+                  style={{ backgroundColor: "#25D366" }}
                   href="https://wa.me/600328566183"
                   target="_blank"
                   rel="noreferrer"
-                >
+                > 
                   WhatsApp
                 </a>
               </div>
