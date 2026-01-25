@@ -376,12 +376,6 @@ function RecommendedMenuCarousel({
                       <h3 className="truncate text-xl font-extrabold leading-snug text-neutral-900">
                         {m.nameKo ?? m.name}
                       </h3>
-
-                      {m.tags?.includes("RECOMMENDED") && (
-                        <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
-                          RECOMMENDED
-                        </span>
-                      )}
                     </div>
 
                     {m.nameKo && (
@@ -439,12 +433,6 @@ function RecommendedMenuCarousel({
                           <h3 className="truncate text-xl font-extrabold leading-snug text-neutral-900 sm:text-xl">
                             {m.nameKo ?? m.name}
                           </h3>
-
-                          {m.tags?.includes("RECOMMENDED") && (
-                            <span className="shrink-0 rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-extrabold text-neutral-950">
-                              RECOMMENDED
-                            </span>
-                          )}
                         </div>
 
                         {m.nameKo && (
