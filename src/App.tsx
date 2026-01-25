@@ -169,6 +169,33 @@ function AnimatedMenuIcon({
   );
 }
 
+function ActiveTriStrokeBar() {
+  return (
+    <span
+      className="pointer-events-none absolute bottom-[-1px] h-[3px] overflow-hidden rounded-full"
+      style={{ left: -12, right: -12 }}
+    >
+      <span className="flex h-full w-full">
+        <span className="h-full w-1/2 bg-blue-600" />
+        <span className="h-full w-1/4 bg-red-600" />
+        <span className="h-full w-1/4 bg-amber-400" />
+      </span>
+    </span>
+  );
+}
+
+function DesktopNavLink({ to, children }: { to: string; children: ReactNode }) {
+  return (
+    <NavLink to={to} className={desktopNavItem}>
+      {({ isActive }) => (
+        <span className="relative inline-flex h-full items-center">
+          {children}
+          {isActive && <ActiveTriStrokeBar />}
+        </span>
+      )}
+    </NavLink>
+  );
+}
 
 // McD-like: bigger + bolder header nav
 const desktopNavItem = ({ isActive }: { isActive: boolean }) =>
@@ -176,6 +203,8 @@ const desktopNavItem = ({ isActive }: { isActive: boolean }) =>
     "text-2xl font-extrabold tracking-tight transition",
     isActive ? "text-neutral-950" : "text-neutral-700 hover:text-neutral-950",
   ].join(" ");
+
+
 
 const mobileNavItem = ({ isActive }: { isActive: boolean }) =>
   [
@@ -245,7 +274,8 @@ export default function App() {
           </div>
 
           {/* Header body: larger */}
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 lg:py-5">
+          <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 lg:h-[80px]">
+
             {/* Left: Logo */}
             <Link to="/" className="flex items-center gap-3">
               <img
@@ -258,20 +288,13 @@ export default function App() {
             </Link>
 
             {/* Center: Desktop nav */}
-            <nav className="hidden items-center gap-10 md:flex">
-              <NavLink className={desktopNavItem} to="/">
-                Home
-              </NavLink>
-              <NavLink className={desktopNavItem} to="/menu">
-                Menu
-              </NavLink>
-              <NavLink className={desktopNavItem} to="/promos">
-                Promos
-              </NavLink>
-              <NavLink className={desktopNavItem} to="/contact">
-                Contact
-              </NavLink>
+            <nav className="hidden h-full items-stretch gap-10 md:flex">
+              <DesktopNavLink to="/">Home</DesktopNavLink>
+              <DesktopNavLink to="/menu">Menu</DesktopNavLink>
+              <DesktopNavLink to="/promos">Promos</DesktopNavLink>
+              <DesktopNavLink to="/contact">Contact</DesktopNavLink>
             </nav>
+
 
             {/* Right: utilities */}
             <div className="flex items-center gap-2">
