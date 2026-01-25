@@ -725,6 +725,7 @@ export const items: Item[] = [
     category: "BEVERAGES",
     nameKo: "막걸리",
     name: "MAKGEOLLI",
+    desc: "Korean rice wine",
     tags: ["WINE"],
     image: { src: publicUrl("menu/beverages/maekgeolli.webp"), alt: "MAKGEOLLI" },
     price: { kind: "fixed", rm: 35 },
