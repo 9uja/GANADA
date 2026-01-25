@@ -654,7 +654,7 @@ export const items: Item[] = [
     desc: "Wheat flour noodles in a light anchovy broth topped with mountain like vegetables",
     tags: ["Best", "RECOMMENDED"],
     image: { src: publicUrl("menu/noodles/sanduhmi-guksu.webp"), alt: "SANDUHMI GUKSU" },
-    price: { kind: "fixed", rm: 30 },
+    price: { kind: "fixed", rm: 21 },
   },
   //BEVERAGES
   {
