@@ -198,7 +198,11 @@ export default function App() {
           ].join(" ")}
         >
           {/* thin brand strip */}
-          <div className="h-1.5 w-full bg-amber-400" />
+          <div className="flex h-1.5 w-full">
+            <div className="h-full w-1/2 bg-blue-600" />
+            <div className="h-full w-1/4 bg-red-600" />
+            <div className="h-full w-1/4 bg-amber-400" />
+          </div>
 
           {/* Header body: larger */}
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 lg:py-5">
@@ -235,7 +239,7 @@ export default function App() {
               <div className="hidden items-center gap-2 md:flex">
                 <a
                   className="inline-flex h-10 items-center justify-center rounded-full bg-neutral-900 px-5 text-base font-extrabold text-white hover:opacity-90"
-                  href="https://wa.me/60123456789"
+                  href="https://wa.me/600328566183"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -280,7 +284,7 @@ export default function App() {
 
                 <a
                   className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-neutral-900 text-base font-extrabold text-white hover:opacity-90"
-                  href="https://wa.me/60123456789"
+                  href="https://wa.me/600328566183"
                   target="_blank"
                   rel="noreferrer"
                 >

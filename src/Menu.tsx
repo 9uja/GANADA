@@ -93,15 +93,15 @@ const CATEGORY_ICON_MAP: Record<string, string> = {
   All: "category-icons/all.svg",
   "BEEF BBQ": "category-icons/beef-bbq.svg",
   "PORK BBQ": "category-icons/pork-bbq.svg",
-  "LIVE": "category-icons/live.svg",
+  LIVE: "category-icons/live.svg",
   "OTHER BBQ": "category-icons/other-bbq.svg",
-  "HOTPOT": "category-icons/hotpot.svg",
-  "STEW": "category-icons/stew.svg",
+  HOTPOT: "category-icons/hotpot.svg",
+  STEW: "category-icons/stew.svg",
   "CHEESE SERIES": "category-icons/cheese-series.svg",
-  "SIDEDISH": "category-icons/sidedish.svg",
-  "RICE": "category-icons/rice.svg",
-  "NOODLES": "category-icons/noodles.svg",
-  "BEVERAGES": "category-icons/beverages.svg",
+  SIDEDISH: "category-icons/sidedish.svg",
+  RICE: "category-icons/rice.svg",
+  NOODLES: "category-icons/noodles.svg",
+  BEVERAGES: "category-icons/beverages.svg",
 };
 
 function categoryIconSrc(c: Category) {
@@ -111,18 +111,18 @@ function categoryIconSrc(c: Category) {
 
 /** ✅ category accent color (bg) */
 const CATEGORY_ACCENT_BG: Record<string, string> = {
-  "All": "bg-amber-400 text-neutral-950",
+  All: "bg-amber-400 text-neutral-950",
   "BEEF BBQ": "bg-red-600 text-white",
   "PORK BBQ": "bg-rose-600 text-white",
-  "LIVE": "bg-emerald-600 text-white",
+  LIVE: "bg-emerald-600 text-white",
   "OTHER BBQ": "bg-orange-600 text-white",
-  "HOTPOT": "bg-indigo-600 text-white",
-  "STEW": "bg-amber-600 text-white",
+  HOTPOT: "bg-indigo-600 text-white",
+  STEW: "bg-amber-600 text-white",
   "CHEESE SERIES": "bg-sky-600 text-white",
-  "NOODLES": "bg-yellow-600 text-white",
-  "SIDEDISH": "bg-lime-600 text-white",
-  "RICE": "bg-violet-600 text-white",
-  "BEVERAGES": "bg-fuchsia-600 text-white",
+  NOODLES: "bg-yellow-600 text-white",
+  SIDEDISH: "bg-lime-600 text-white",
+  RICE: "bg-violet-600 text-white",
+  BEVERAGES: "bg-fuchsia-600 text-white",
 };
 
 function categoryAccentClass(c: Category) {
@@ -292,7 +292,7 @@ export default function Menu() {
 
   const list = useMemo(() => getItemsForCategory(active), [active]);
 
-  // ✅ top category bubble scroller ref
+  // top category bubble scroller ref
   const catBarRef = useRef<HTMLDivElement | null>(null);
 
   // first paint preload (best-effort)
@@ -369,11 +369,13 @@ export default function Menu() {
     if (lightboxItem) setFabOpen(false);
   }, [lightboxItem]);
 
-  // ✅ 활성 카테고리 바뀌면 상단 버블을 중앙 쪽으로 스크롤
+  // 활성 카테고리 바뀌면 상단 버블을 중앙 쪽으로 스크롤
   useEffect(() => {
     const root = catBarRef.current;
     if (!root) return;
-    const el = root.querySelector<HTMLButtonElement>(`button[data-cat="${String(active)}"]`);
+    const el = root.querySelector<HTMLButtonElement>(
+      `button[data-cat="${String(active)}"]`
+    );
     if (!el) return;
 
     const r = root.getBoundingClientRect();
@@ -397,7 +399,7 @@ export default function Menu() {
     setPendingScrollTop(true);
   };
 
-  // ✅ 오른쪽/하단을 더 붙이되(iPhone safe-area 고려), 패널이 화면 밖으로 안 나가게 maxWidth 계산
+  // 오른쪽/하단을 더 붙이되(iPhone safe-area 고려), 패널이 화면 밖으로 안 나가게 maxWidth 계산
   const fabRight = "calc(env(safe-area-inset-right) + 6px)";
   const fabBottom = "calc(env(safe-area-inset-bottom) + 10px)";
   const panelMaxWidth = "calc(100vw - env(safe-area-inset-right) - 12px)";
@@ -408,24 +410,25 @@ export default function Menu() {
     root.scrollBy({ left: 260, behavior: "smooth" });
   };
 
+  // ✅ 3색 얇은 테두리(파랑/빨강/노랑)
+  const cardTriBorder =
+    "bg-[linear-gradient(90deg,#2563eb_0%,#2563eb_33.33%,#dc2626_33.33%,#dc2626_66.66%,#facc15_66.66%,#facc15_100%)]";
+
   return (
     <div className="mx-auto max-w-6xl px-0 pb-8 sm:px-0">
-      {/* ✅ 상단 카테고리: 버블(필) + 가로 스크롤 + 우측 슬라이드 버튼 */}
+      {/* 상단 카테고리: 버블 + 가로 스크롤 + 우측 슬라이드 버튼 */}
       <div className="mt-3">
-        <div className="relative bg-[#d9c6b6]/70 px-2 sm:px-4 py-10">
-          {/* 스크롤 영역 */}
+        <div className="relative bg-[#d9c6b6]/70 px-2 py-10 sm:px-4">
           <div
             ref={catBarRef}
             className={[
               "flex items-center gap-2 overflow-x-auto overscroll-x-contain whitespace-nowrap pr-10",
               "scroll-smooth",
               "[scrollbar-width:none] [-ms-overflow-style:none]",
+              "hide-scrollbar",
             ].join(" ")}
-            style={{
-              WebkitOverflowScrolling: "touch",
-            }}
+            style={{ WebkitOverflowScrolling: "touch" }}
           >
-            {/* Webkit scrollbar hide */}
             <style>{`
               .hide-scrollbar::-webkit-scrollbar { display: none; }
             `}</style>
@@ -438,11 +441,10 @@ export default function Menu() {
                   data-cat={String(c)}
                   onClick={() => handlePickCategory(c)}
                   className={[
-                    "hide-scrollbar inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold",
-                    "transition",
+                    "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold transition",
                     isActive
                       ? `${categoryAccentClass(c)} shadow-sm`
-                      : "bg-white text-neutral-900 hover:bg-neutral-50 border border-neutral-200",
+                      : "border border-neutral-200 bg-white text-neutral-900 hover:bg-neutral-50",
                   ].join(" ")}
                   type="button"
                 >
@@ -464,10 +466,9 @@ export default function Menu() {
             })}
           </div>
 
-          {/* 우측 슬라이드 버튼 (이미지처럼) */}
           <button
             onClick={onScrollRight}
-            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-sm hover:bg-white"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-sm hover:bg-white"
             type="button"
             aria-label="Scroll categories right"
           >
@@ -476,69 +477,85 @@ export default function Menu() {
         </div>
       </div>
 
-      <div className="mt-4 px-2 sm:px-6 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-2">
+      {/* ✅ 메뉴 카드 그리드 */}
+      <div className="mt-4 grid grid-cols-2 gap-2 px-2 sm:grid-cols-2 sm:gap-3 sm:px-6">
         {list.map((m) => (
           <button
             key={`${m.category}-${m.name}-${m.image.src}`}
             onClick={() => setLightboxItem(m)}
-            className="group w-full overflow-hidden rounded-3xl border border-neutral-200 bg-white text-left shadow-sm transition hover:shadow-md"
+            className="group w-full text-left"
             type="button"
           >
-            <div className="aspect-[4/3] w-full overflow-hidden bg-white">
-              <img
-                src={resolveSrc(m.image.src)}
-                alt={m.image.alt}
-                className="h-full w-full object-contain"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+            {/* ✅ 3색 얇은 테두리 */}
+            <div
+              className={[
+                "rounded-3xl p-[1px] shadow-sm transition group-hover:shadow-md",
+                cardTriBorder,
+              ].join(" ")}
+            >
+              {/* ✅ 실제 카드 */}
+              <div className="overflow-hidden rounded-3xl bg-white">
+                <div className="aspect-[4/3] w-full overflow-hidden bg-white">
+                  <img
+                    src={resolveSrc(m.image.src)}
+                    alt={m.image.alt}
+                    className="h-full w-full object-contain"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
 
-            <div className="p-4">
-              <h3 className="truncate text-base font-extrabold leading-snug text-neutral-900">
-                {m.nameKo ?? m.name}
-              </h3>
+                <div className="p-4">
+                  <h3 className="truncate text-base font-extrabold leading-snug text-neutral-900">
+                    {m.nameKo ?? m.name}
+                  </h3>
 
-              {m.nameKo && (
-                <p className="truncate text-xs font-semibold text-neutral-500">{m.name}</p>
-              )}
+                  {m.nameKo && (
+                    <p className="truncate text-xs font-semibold text-neutral-500">
+                      {m.name}
+                    </p>
+                  )}
 
-              {m.desc && (
-                <p className="mt-1 line-clamp-3 whitespace-pre-line text-xs leading-relaxed text-neutral-600 sm:text-sm">
-                  {m.desc}
-                </p>
-              )}
+                  {m.desc && (
+                    <p className="mt-1 line-clamp-3 whitespace-pre-line text-xs leading-relaxed text-neutral-600 sm:text-sm">
+                      {m.desc}
+                    </p>
+                  )}
 
-              <div className="mt-2 text-sm font-extrabold text-neutral-900">
-                {priceLabel(m.price)}
+                  <div className="mt-2 text-sm font-extrabold text-neutral-900">
+                    {priceLabel(m.price)}
+                  </div>
+                  {priceSubLabel(m.price) && (
+                    <div className="text-xs font-semibold text-neutral-500">
+                      {priceSubLabel(m.price)}
+                    </div>
+                  )}
+
+                  {!!m.tags?.length && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {m.tags.map((t) => (
+                        <span
+                          key={t}
+                          className={[
+                            "max-w-full rounded-full px-2 py-0.5 text-[11px] font-extrabold",
+                            "overflow-hidden text-ellipsis whitespace-nowrap",
+                            t === "Best"
+                              ? "bg-amber-400 text-neutral-950"
+                              : "border border-neutral-200 bg-white text-neutral-700",
+                          ].join(" ")}
+                          title={t}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="mt-2 text-xs font-semibold text-neutral-500">
+                    Tap to view photo
+                  </p>
+                </div>
               </div>
-              {priceSubLabel(m.price) && (
-                <div className="text-xs font-semibold text-neutral-500">
-                  {priceSubLabel(m.price)}
-                </div>
-              )}
-
-              {!!m.tags?.length && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {m.tags.map((t) => (
-                    <span
-                      key={t}
-                      className={[
-                        "max-w-full rounded-full px-2 py-0.5 text-[11px] font-extrabold",
-                        "overflow-hidden text-ellipsis whitespace-nowrap",
-                        t === "Best"
-                          ? "bg-amber-400 text-neutral-950"
-                          : "border border-neutral-200 bg-white text-neutral-700",
-                      ].join(" ")}
-                      title={t}
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <p className="mt-2 text-xs font-semibold text-neutral-500">Tap to view photo</p>
             </div>
           </button>
         ))}
@@ -554,11 +571,7 @@ export default function Menu() {
         </p>
       )}
 
-      {/* ✅ Floating UI (카테고리 리스트 + Top)
-          - 오른쪽 갭 최소화(safe-area-inset-right 반영)
-          - 패널도 오른쪽 정렬
-          - 패널 maxWidth로 화면 밖 잘림 방지
-          - 버튼 순서: 메인(카테고리/X) 위, Top 아래 */}
+      {/* Floating UI (카테고리 리스트 + Top) */}
       {!lightboxItem && showFloating && (
         <>
           {fabOpen && (
@@ -596,6 +609,9 @@ export default function Menu() {
                 <div className="grid gap-1">
                   {categories.map((c, idx) => {
                     const isActive = c === active;
+                    const bgOnly =
+                      CATEGORY_ACCENT_BG[String(c)]?.split(" ")[0] ?? "bg-neutral-900";
+
                     return (
                       <button
                         key={String(c)}
@@ -620,7 +636,7 @@ export default function Menu() {
                         <span
                           className={[
                             "flex h-8 w-8 items-center justify-center rounded-full",
-                            isActive ? "bg-white/15" : (CATEGORY_ACCENT_BG[String(c)] ? CATEGORY_ACCENT_BG[String(c)].split(" ")[0] : "bg-neutral-900"),
+                            isActive ? "bg-white/15" : bgOnly,
                           ].join(" ")}
                         >
                           <CategoryIcon c={c} className="h-4 w-4" colorClass="bg-white" />
