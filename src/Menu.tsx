@@ -173,7 +173,7 @@ function CategorySheet({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // NOTE: 기존 동작 유지(시트 열리면 바디 스크롤 잠금)
+  // 시트 열릴 때 바디 스크롤 잠금
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -213,7 +213,7 @@ function CategorySheet({
             </button>
           </div>
 
-          {/* ✅ iPhone에서 잘림 방지: 목록 영역을 스크롤 컨테이너로 */}
+          {/* ✅ iPhone 잘림 방지: 목록 자체 스크롤 */}
           <div
             className="mt-4 flex-1 overflow-y-auto overscroll-contain pr-1"
             style={{ WebkitOverflowScrolling: "touch" }}
@@ -237,14 +237,8 @@ function CategorySheet({
                     type="button"
                   >
                     <span className="flex min-w-0 items-center gap-3">
-                      <CategoryIcon
-                        c={c}
-                        className="h-5 w-5 shrink-0"
-                        colorClass="bg-neutral-900"
-                      />
-                      <span className="truncate text-sm font-extrabold">
-                        {categoryLabel(c)}
-                      </span>
+                      <CategoryIcon c={c} className="h-5 w-5 shrink-0" colorClass="bg-neutral-900" />
+                      <span className="truncate text-sm font-extrabold">{categoryLabel(c)}</span>
                     </span>
 
                     {isActive && (
@@ -363,7 +357,7 @@ export default function Menu() {
   const [lightboxItem, setLightboxItem] = useState<Item | null>(null);
   const [showFloating, setShowFloating] = useState(false);
 
-  // ✅ 카테고리 변경 시 "시트가 닫힌 뒤" 최상단 이동을 보장하기 위한 플래그
+  // ✅ 카테고리 변경 시 "시트가 닫힌 뒤" 최상단 이동 보장
   const [pendingScrollTop, setPendingScrollTop] = useState(false);
 
   const list = useMemo(() => getItemsForCategory(active), [active]);
@@ -408,10 +402,9 @@ export default function Menu() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ✅ 시트/라이트박스가 닫힌 후에만 스크롤을 수행 (iOS에서 안정적)
+  // ✅ iOS 안정성: 시트/라이트박스 닫힌 후 다음 프레임에 스크롤 수행
   useEffect(() => {
     if (!pendingScrollTop) return;
-
     if (sheetOpen || lightboxItem) return;
 
     const id = window.requestAnimationFrame(() => {
@@ -450,13 +443,12 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* ✅ 상단 카테고리 버튼: DOM 제거 금지(레이아웃 시프트 방지) */}
+      {/* ✅ 상단 카테고리 버튼: DOM 제거 금지(스크롤 튐 방지) */}
       <div className="mt-5">
         <button
           onClick={() => setSheetOpen(true)}
           className={[
             "flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-left shadow-sm transition hover:bg-neutral-50",
-            // showFloating일 때는 보이지 않게만 처리(공간 유지)
             showFloating ? "invisible pointer-events-none" : "visible",
           ].join(" ")}
           type="button"
@@ -481,9 +473,10 @@ export default function Menu() {
           <button
             key={`${m.category}-${m.name}-${m.image.src}`}
             onClick={() => setLightboxItem(m)}
-            className="group w-full overflow-hidden rounded-3xl border border-neutral-200 bg-white text-left shadow-sm transition"
+            className="group w-full overflow-hidden rounded-3xl border border-neutral-200 bg-white text-left shadow-sm transition hover:shadow-md"
             type="button"
           >
+            {/* ✅ 800x600 정확 비율: 4:3 + contain, 배경은 흰색 */}
             <div className="aspect-[4/3] w-full overflow-hidden bg-white">
               <img
                 src={resolveSrc(m.image.src)}
@@ -494,57 +487,55 @@ export default function Menu() {
               />
             </div>
 
+            {/* ✅ 데스크탑도 모바일처럼: 한글명 → 영문명 → 설명 → 가격 → 태그 */}
             <div className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                {/* Left (name → desc) */}
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-base font-extrabold leading-snug text-neutral-900">
-                    {m.nameKo ?? m.name}
-                  </h3>
-                  {m.nameKo && (
-                    <p className="truncate text-xs font-semibold text-neutral-500">{m.name}</p>
-                  )}
+              {/* 1) 메뉴 한국 이름 */}
+              <h3 className="truncate text-base font-extrabold leading-snug text-neutral-900">
+                {m.nameKo ?? m.name}
+              </h3>
 
-                  {m.desc && (
-                    <p className="mt-1 line-clamp-3 whitespace-pre-line text-xs leading-relaxed text-neutral-600 sm:text-sm">
-                      {m.desc}
-                    </p>
-                  )}
-                </div>
+              {/* 2) 메뉴 영문 이름 */}
+              {m.nameKo && (
+                <p className="truncate text-xs font-semibold text-neutral-500">{m.name}</p>
+              )}
 
-                {/* Right (price → tags) */}
-                <div className="mt-1 flex min-w-0 flex-col items-start gap-1 sm:mt-0 sm:items-end sm:text-right">
-                  <div className="text-sm font-extrabold text-neutral-900">
-                    {priceLabel(m.price)}
-                  </div>
+              {/* 3) 설명 */}
+              {m.desc && (
+                <p className="mt-1 line-clamp-3 whitespace-pre-line text-xs leading-relaxed text-neutral-600 sm:text-sm">
+                  {m.desc}
+                </p>
+              )}
 
-                  {priceSubLabel(m.price) && (
-                    <div className="text-xs font-semibold text-neutral-500">
-                      {priceSubLabel(m.price)}
-                    </div>
-                  )}
-
-                  {!!m.tags?.length && (
-                    <div className="mt-1 flex min-w-0 flex-wrap gap-1.5 sm:justify-end">
-                      {m.tags.map((t) => (
-                        <span
-                          key={t}
-                          className={[
-                            "max-w-full rounded-full px-2 py-0.5 text-[11px] font-extrabold",
-                            "overflow-hidden text-ellipsis whitespace-nowrap",
-                            t === "Best"
-                              ? "bg-amber-400 text-neutral-950"
-                              : "border border-neutral-200 bg-white text-neutral-700",
-                          ].join(" ")}
-                          title={t}
-                        >
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
+              {/* 4) 가격 */}
+              <div className="mt-2 text-sm font-extrabold text-neutral-900">
+                {priceLabel(m.price)}
               </div>
+              {priceSubLabel(m.price) && (
+                <div className="text-xs font-semibold text-neutral-500">
+                  {priceSubLabel(m.price)}
+                </div>
+              )}
+
+              {/* 5) 태그 */}
+              {!!m.tags?.length && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {m.tags.map((t) => (
+                    <span
+                      key={t}
+                      className={[
+                        "max-w-full rounded-full px-2 py-0.5 text-[11px] font-extrabold",
+                        "overflow-hidden text-ellipsis whitespace-nowrap",
+                        t === "Best"
+                          ? "bg-amber-400 text-neutral-950"
+                          : "border border-neutral-200 bg-white text-neutral-700",
+                      ].join(" ")}
+                      title={t}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               <p className="mt-2 text-xs font-semibold text-neutral-500">Tap to view photo</p>
             </div>
