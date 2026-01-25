@@ -3,7 +3,11 @@ import { useEffect, useMemo, useState } from "react";
 import { categories, items, type Category, type Item } from "./menuData";
 
 /** GitHub Pages(예: /menu/)에서도 public 파일이 깨지지 않게 base를 자동 반영 */
-const publicUrl = (p: string) => `${import.meta.env.BASE_URL}${p.replace(/^\/+/, "")}`;
+const publicUrl = (p: string) => {
+  const base = import.meta.env.BASE_URL.replace(/\/+$/, "/");
+  const path = p.replace(/^\/+/, "");
+  return `${base}${path}`;
+};
 
 function resolveSrc(src: string) {
   if (!src) return src;
@@ -453,6 +457,7 @@ export default function Menu() {
           <ChevronDownIcon className="h-5 w-5 text-neutral-500" />
         </button>
       </div>
+
 
       <div className="mt-4 grid grid-cols-2 gap-1 sm:mt-6 sm:gap-3 lg:grid-cols-3">
         {list.map((m, idx) => (
