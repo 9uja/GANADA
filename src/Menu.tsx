@@ -1,5 +1,5 @@
 // src/Menu.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { categories, items, type Category, type Item } from "./menuData";
 
 /** GitHub Pages(예: /menu/)에서도 public 파일이 깨지지 않게 base를 자동 반영 */
@@ -43,26 +43,90 @@ type WindowWithIdleCallback = Window & {
   cancelIdleCallback?: (id: number) => void;
 };
 
+/** ✅ ArrowUp SVG icon */
+function ArrowUpIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+      <path
+        d="M12 5l-6 6m6-6l6 6M12 5v14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** ✅ X icon (for open state) */
+function XIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/** ✅ Right chevron (for category scroller) */
+function ChevronRightIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={className}>
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 /** Category icon SVG files (public/) */
-/** ✅ switch 제거(유니온 불일치 TS2678 방지): 문자열 키 매핑으로 처리 */
 const CATEGORY_ICON_MAP: Record<string, string> = {
   All: "category-icons/all.svg",
   "BEEF BBQ": "category-icons/beef-bbq.svg",
   "PORK BBQ": "category-icons/pork-bbq.svg",
-  LIVE: "category-icons/live.svg",
+  "LIVE": "category-icons/live.svg",
   "OTHER BBQ": "category-icons/other-bbq.svg",
-  HOTPOT: "category-icons/hotpot.svg",
-  "MEAT DISH": "category-icons/meat-dish.svg",
-  "SEAFOOD DISH": "category-icons/seafood-dish.svg",
-  "NOODLES & RICE": "category-icons/noodles-rice.svg",
-  "SIDE DISH": "category-icons/side-dish.svg",
-  "SOUP & STEW": "category-icons/soup-stew.svg",
-  "LUNCH SPECIAL": "category-icons/lunch-special.svg",
+  "HOTPOT": "category-icons/hotpot.svg",
+  "STEW": "category-icons/stew.svg",
+  "CHEESE SERIES": "category-icons/cheese-series.svg",
+  "SIDEDISH": "category-icons/sidedish.svg",
+  "RICE": "category-icons/rice.svg",
+  "NOODLES": "category-icons/noodles.svg",
+  "BEVERAGES": "category-icons/beverages.svg",
 };
 
 function categoryIconSrc(c: Category) {
   const rel = CATEGORY_ICON_MAP[String(c)] ?? "category-icons/all.svg";
   return publicUrl(rel);
+}
+
+/** ✅ category accent color (bg) */
+const CATEGORY_ACCENT_BG: Record<string, string> = {
+  "All": "bg-amber-400 text-neutral-950",
+  "BEEF BBQ": "bg-red-600 text-white",
+  "PORK BBQ": "bg-rose-600 text-white",
+  "LIVE": "bg-emerald-600 text-white",
+  "OTHER BBQ": "bg-orange-600 text-white",
+  "HOTPOT": "bg-indigo-600 text-white",
+  "STEW": "bg-amber-600 text-white",
+  "CHEESE SERIES": "bg-sky-600 text-white",
+  "NOODLES": "bg-yellow-600 text-white",
+  "SIDEDISH": "bg-lime-600 text-white",
+  "RICE": "bg-violet-600 text-white",
+  "BEVERAGES": "bg-fuchsia-600 text-white",
+};
+
+function categoryAccentClass(c: Category) {
+  return CATEGORY_ACCENT_BG[String(c)] ?? "bg-neutral-900 text-white";
 }
 
 function CategoryIcon({
@@ -125,132 +189,6 @@ function getItemsForCategory(active: Category) {
       return a.idx - b.idx;
     })
     .map(({ it }) => it);
-}
-
-function ChevronDownIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path
-        d="M5 7.5L10 12.5L15 7.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function CategorySheet({
-  open,
-  onClose,
-  categories,
-  active,
-  onPick,
-}: {
-  open: boolean;
-  onClose: () => void;
-  categories: Category[];
-  active: Category;
-  onPick: (c: Category) => void;
-}) {
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  // 시트 열릴 때 바디 스크롤 잠금
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [open]);
-
-  if (!open) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-[998] bg-black/40 backdrop-blur-sm"
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-    >
-      <div
-        className="fixed inset-x-0 bottom-0 z-[999] mx-auto w-full max-w-6xl rounded-t-3xl border border-neutral-200 bg-white p-4 shadow-[0_-20px_60px_rgba(0,0,0,0.25)] max-h-[85vh] overflow-hidden"
-        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex max-h-[85vh] flex-col">
-          <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-neutral-200" />
-
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-extrabold tracking-tight text-neutral-900">
-              Choose a category
-            </h2>
-            <button
-              onClick={onClose}
-              className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-sm font-semibold text-neutral-900 hover:bg-neutral-50"
-              type="button"
-            >
-              Close
-            </button>
-          </div>
-
-          {/* ✅ iPhone 잘림 방지: 목록 자체 스크롤 */}
-          <div
-            className="mt-4 flex-1 overflow-y-auto overscroll-contain pr-1"
-            style={{ WebkitOverflowScrolling: "touch" }}
-          >
-            <div className="grid gap-2">
-              {categories.map((c) => {
-                const isActive = c === active;
-                return (
-                  <button
-                    key={String(c)}
-                    onClick={() => {
-                      onPick(c);
-                      onClose();
-                    }}
-                    className={[
-                      "flex items-center justify-between rounded-2xl border px-4 py-3 text-left transition",
-                      isActive
-                        ? "border-neutral-900 bg-white text-neutral-900"
-                        : "border-neutral-200 bg-white hover:bg-neutral-50",
-                    ].join(" ")}
-                    type="button"
-                  >
-                    <span className="flex min-w-0 items-center gap-3">
-                      <CategoryIcon
-                        c={c}
-                        className="h-5 w-5 shrink-0"
-                        colorClass="bg-neutral-900"
-                      />
-                      <span className="truncate text-sm font-extrabold">{categoryLabel(c)}</span>
-                    </span>
-
-                    {isActive && (
-                      <span className="text-xs font-extrabold opacity-70">Selected</span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <p className="mt-4 text-xs text-neutral-500">
-            Tip: Use the floating button (after you scroll) to change categories anytime.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function Lightbox({
@@ -339,22 +277,23 @@ function Lightbox({
 }
 
 export default function Menu() {
-  /**
-   * 옵션 B 정책:
-   * - 메뉴 탭으로 '새로 진입(마운트)'하면 항상 All
-   * - 메뉴 페이지 내부에서 카테고리 이동은 유지
-   * - 메뉴를 떠났다가 다시 들어오면 다시 All
-   */
   const [active, setActive] = useState<Category>("All");
-
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [lightboxItem, setLightboxItem] = useState<Item | null>(null);
-  const [showFloating, setShowFloating] = useState(false);
 
-  // ✅ 카테고리 변경 시 "시트가 닫힌 뒤" 최상단 이동 보장
+  // floating visibility
+  const [showFloating, setShowFloating] = useState(false); // 180px+
+  const [showTop, setShowTop] = useState(false); // 300px+
+
+  // category change scroll-to-top after closing overlays
   const [pendingScrollTop, setPendingScrollTop] = useState(false);
 
+  // expandable FAB open/close (category list)
+  const [fabOpen, setFabOpen] = useState(false);
+
   const list = useMemo(() => getItemsForCategory(active), [active]);
+
+  // ✅ top category bubble scroller ref
+  const catBarRef = useRef<HTMLDivElement | null>(null);
 
   // first paint preload (best-effort)
   useEffect(() => {
@@ -378,7 +317,7 @@ export default function Menu() {
     return () => window.clearTimeout(t);
   }, [active]);
 
-  // floating button visibility
+  // floating visibility
   useEffect(() => {
     let ticking = false;
 
@@ -386,6 +325,9 @@ export default function Menu() {
       ticking = false;
       const y = window.scrollY || window.pageYOffset || 0;
       setShowFloating(y > 180);
+      setShowTop(y > 300);
+
+      if (y <= 120) setFabOpen(false);
     };
 
     const onScroll = () => {
@@ -399,10 +341,20 @@ export default function Menu() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // ✅ iOS 안정성: 시트/라이트박스 닫힌 후 다음 프레임에 스크롤 수행
+  // ESC로 fab 닫기
+  useEffect(() => {
+    if (!fabOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFabOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [fabOpen]);
+
+  // iOS 안정성: 라이트박스 닫힌 후 다음 프레임에 스크롤 수행
   useEffect(() => {
     if (!pendingScrollTop) return;
-    if (sheetOpen || lightboxItem) return;
+    if (lightboxItem) return;
 
     const id = window.requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -410,9 +362,26 @@ export default function Menu() {
 
     setPendingScrollTop(false);
     return () => window.cancelAnimationFrame(id);
-  }, [pendingScrollTop, sheetOpen, lightboxItem]);
+  }, [pendingScrollTop, lightboxItem]);
 
-  const canShowFloating = showFloating && !sheetOpen && !lightboxItem;
+  // lightbox 열리면 fab는 닫기
+  useEffect(() => {
+    if (lightboxItem) setFabOpen(false);
+  }, [lightboxItem]);
+
+  // ✅ 활성 카테고리 바뀌면 상단 버블을 중앙 쪽으로 스크롤
+  useEffect(() => {
+    const root = catBarRef.current;
+    if (!root) return;
+    const el = root.querySelector<HTMLButtonElement>(`button[data-cat="${String(active)}"]`);
+    if (!el) return;
+
+    const r = root.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    const delta = b.left - r.left - (r.width / 2 - b.width / 2);
+
+    root.scrollBy({ left: delta, behavior: "smooth" });
+  }, [active]);
 
   const isBbqGroup =
     active === "All" ||
@@ -424,7 +393,19 @@ export default function Menu() {
 
   const handlePickCategory = (c: Category) => {
     setActive(c);
+    setFabOpen(false);
     setPendingScrollTop(true);
+  };
+
+  // ✅ 오른쪽/하단을 더 붙이되(iPhone safe-area 고려), 패널이 화면 밖으로 안 나가게 maxWidth 계산
+  const fabRight = "calc(env(safe-area-inset-right) + 6px)";
+  const fabBottom = "calc(env(safe-area-inset-bottom) + 10px)";
+  const panelMaxWidth = "calc(100vw - env(safe-area-inset-right) - 12px)";
+
+  const onScrollRight = () => {
+    const root = catBarRef.current;
+    if (!root) return;
+    root.scrollBy({ left: 260, behavior: "smooth" });
   };
 
   return (
@@ -440,32 +421,73 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* ✅ 상단 카테고리 버튼: DOM 제거 금지(스크롤 튐 방지) */}
-      <div className="mt-5">
-        <button
-          onClick={() => setSheetOpen(true)}
-          className={[
-            "flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-left shadow-sm transition hover:bg-neutral-50",
-            showFloating ? "invisible pointer-events-none" : "visible",
-          ].join(" ")}
-          type="button"
-          aria-hidden={showFloating}
-          tabIndex={showFloating ? -1 : 0}
-        >
-          <span className="flex min-w-0 items-center gap-3">
-            <CategoryIcon c={active} className="h-5 w-5 shrink-0" colorClass="bg-neutral-900" />
-            <span className="min-w-0">
-              <span className="block text-xs font-semibold text-neutral-500">Category</span>
-              <span className="block truncate text-sm font-extrabold text-neutral-900">
-                {categoryLabel(active)}
-              </span>
-            </span>
-          </span>
-          <ChevronDownIcon className="h-5 w-5 text-neutral-500" />
-        </button>
+      {/* ✅ 상단 카테고리: 버블(필) + 가로 스크롤 + 우측 슬라이드 버튼 */}
+      <div className="mt-4">
+        <div className="relative rounded-3xl bg-[#d9c6b6]/70 px-3 py-3">
+          {/* 스크롤 영역 */}
+          <div
+            ref={catBarRef}
+            className={[
+              "flex items-center gap-2 overflow-x-auto overscroll-x-contain whitespace-nowrap pr-10",
+              "scroll-smooth",
+              "[scrollbar-width:none] [-ms-overflow-style:none]",
+            ].join(" ")}
+            style={{
+              WebkitOverflowScrolling: "touch",
+            }}
+          >
+            {/* Webkit scrollbar hide */}
+            <style>{`
+              .hide-scrollbar::-webkit-scrollbar { display: none; }
+            `}</style>
+
+            {categories.map((c) => {
+              const isActive = c === active;
+              return (
+                <button
+                  key={String(c)}
+                  data-cat={String(c)}
+                  onClick={() => handlePickCategory(c)}
+                  className={[
+                    "hide-scrollbar inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold",
+                    "transition",
+                    isActive
+                      ? `${categoryAccentClass(c)} shadow-sm`
+                      : "bg-white text-neutral-900 hover:bg-neutral-50 border border-neutral-200",
+                  ].join(" ")}
+                  type="button"
+                >
+                  <span
+                    className={[
+                      "flex h-6 w-6 items-center justify-center rounded-full",
+                      isActive ? "bg-white/15" : "bg-neutral-900/5",
+                    ].join(" ")}
+                  >
+                    <CategoryIcon
+                      c={c}
+                      className="h-4 w-4"
+                      colorClass={isActive ? "bg-white" : "bg-neutral-900"}
+                    />
+                  </span>
+                  <span className="truncate">{categoryLabel(c)}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* 우측 슬라이드 버튼 (이미지처럼) */}
+          <button
+            onClick={onScrollRight}
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-sm hover:bg-white"
+            type="button"
+            aria-label="Scroll categories right"
+          >
+            <ChevronRightIcon className="h-5 w-5 text-neutral-900" />
+          </button>
+        </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-1 sm:grid-cols-2">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {list.map((m) => (
           <button
             key={`${m.category}-${m.name}-${m.image.src}`}
@@ -473,7 +495,6 @@ export default function Menu() {
             className="group w-full overflow-hidden rounded-3xl border border-neutral-200 bg-white text-left shadow-sm transition hover:shadow-md"
             type="button"
           >
-            {/* ✅ 800x600 정확 비율: 4:3 + contain, 배경은 흰색 */}
             <div className="aspect-[4/3] w-full overflow-hidden bg-white">
               <img
                 src={resolveSrc(m.image.src)}
@@ -484,26 +505,21 @@ export default function Menu() {
               />
             </div>
 
-            {/* ✅ 데스크탑도 모바일처럼: 한글명 → 영문명 → 설명 → 가격 → 태그 */}
             <div className="p-4">
-              {/* 1) 메뉴 한국 이름 */}
               <h3 className="truncate text-base font-extrabold leading-snug text-neutral-900">
                 {m.nameKo ?? m.name}
               </h3>
 
-              {/* 2) 메뉴 영문 이름 */}
               {m.nameKo && (
                 <p className="truncate text-xs font-semibold text-neutral-500">{m.name}</p>
               )}
 
-              {/* 3) 설명 */}
               {m.desc && (
                 <p className="mt-1 line-clamp-3 whitespace-pre-line text-xs leading-relaxed text-neutral-600 sm:text-sm">
                   {m.desc}
                 </p>
               )}
 
-              {/* 4) 가격 */}
               <div className="mt-2 text-sm font-extrabold text-neutral-900">
                 {priceLabel(m.price)}
               </div>
@@ -513,7 +529,6 @@ export default function Menu() {
                 </div>
               )}
 
-              {/* 5) 태그 */}
               {!!m.tags?.length && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {m.tags.map((t) => (
@@ -550,26 +565,138 @@ export default function Menu() {
         </p>
       )}
 
-      {canShowFloating && (
-        <button
-          onClick={() => setSheetOpen(true)}
-          className="fixed right-5 z-[997] flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-extrabold text-neutral-900 shadow-lg hover:bg-neutral-50"
-          style={{ bottom: "calc(env(safe-area-inset-bottom) + 1.25rem)" }}
-          aria-label="Change category"
-          type="button"
-        >
-          <CategoryIcon c={active} className="h-5 w-5 shrink-0" colorClass="bg-neutral-900" />
-          <span className="max-w-[42vw] truncate">{categoryLabel(active)}</span>
-        </button>
-      )}
+      {/* ✅ Floating UI (카테고리 리스트 + Top)
+          - 오른쪽 갭 최소화(safe-area-inset-right 반영)
+          - 패널도 오른쪽 정렬
+          - 패널 maxWidth로 화면 밖 잘림 방지
+          - 버튼 순서: 메인(카테고리/X) 위, Top 아래 */}
+      {!lightboxItem && showFloating && (
+        <>
+          {fabOpen && (
+            <div
+              className="fixed inset-0 z-[996] bg-black/10"
+              onClick={() => setFabOpen(false)}
+              aria-hidden="true"
+            />
+          )}
 
-      <CategorySheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        categories={categories}
-        active={active}
-        onPick={handlePickCategory}
-      />
+          <div
+            className="fixed z-[997] flex flex-col items-end"
+            style={{ right: fabRight, bottom: fabBottom }}
+          >
+            {/* 카테고리 리스트 패널 (열렸을 때만) */}
+            <div
+              className={[
+                "mb-2 overflow-hidden rounded-2xl border border-neutral-200 bg-white/95 shadow-lg backdrop-blur-sm",
+                "transition duration-200 ease-out origin-bottom-right",
+                fabOpen
+                  ? "opacity-100 translate-y-0 scale-100"
+                  : "pointer-events-none opacity-0 translate-y-2 scale-95",
+              ].join(" ")}
+              role="menu"
+              aria-hidden={!fabOpen}
+              style={{
+                maxWidth: panelMaxWidth,
+                width: "min(320px, 78vw)",
+              }}
+            >
+              <div
+                className="max-h-[50vh] overflow-y-auto overscroll-contain p-2"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
+                <div className="grid gap-1">
+                  {categories.map((c, idx) => {
+                    const isActive = c === active;
+                    return (
+                      <button
+                        key={String(c)}
+                        onClick={() => handlePickCategory(c)}
+                        className={[
+                          "flex items-center gap-3 rounded-xl px-3 py-2 text-left transition",
+                          isActive ? "bg-neutral-900 text-white" : "hover:bg-neutral-50",
+                        ].join(" ")}
+                        type="button"
+                        role="menuitem"
+                        style={{
+                          transitionProperty: "transform, opacity, background-color",
+                          transitionDuration: fabOpen ? "260ms" : "160ms",
+                          transitionTimingFunction: fabOpen
+                            ? "cubic-bezier(0.22, 1, 0.36, 1)"
+                            : "ease-in",
+                          transitionDelay: fabOpen ? `${40 + idx * 35}ms` : "0ms",
+                          transform: fabOpen ? "translateY(0px)" : "translateY(6px)",
+                          opacity: fabOpen ? 1 : 0,
+                        }}
+                      >
+                        <span
+                          className={[
+                            "flex h-8 w-8 items-center justify-center rounded-full",
+                            isActive ? "bg-white/15" : (CATEGORY_ACCENT_BG[String(c)] ? CATEGORY_ACCENT_BG[String(c)].split(" ")[0] : "bg-neutral-900"),
+                          ].join(" ")}
+                        >
+                          <CategoryIcon c={c} className="h-4 w-4" colorClass="bg-white" />
+                        </span>
+
+                        <span
+                          className={[
+                            "truncate text-sm font-extrabold",
+                            isActive ? "text-white" : "text-neutral-900",
+                          ].join(" ")}
+                        >
+                          {categoryLabel(c)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 메인 버튼(위): 닫힘=현재 카테고리 아이콘, 열림=X */}
+            <button
+              onClick={() => setFabOpen((v) => !v)}
+              className={[
+                "flex items-center justify-center rounded-full border border-neutral-200 shadow-xl",
+                "focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-900/15",
+                "w-10 h-10 sm:w-14 sm:h-14",
+                "transition duration-200 ease-out",
+                fabOpen ? "bg-white text-neutral-900" : `border-transparent ${categoryAccentClass(active)}`,
+              ].join(" ")}
+              aria-label={fabOpen ? "Close category menu" : "Open category menu"}
+              type="button"
+            >
+              {fabOpen ? (
+                <XIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <CategoryIcon
+                  c={active}
+                  className="h-5 w-5 sm:h-6 sm:w-6"
+                  colorClass="bg-white"
+                />
+              )}
+            </button>
+
+            {/* Top 버튼(아래) */}
+            <button
+              onClick={() => {
+                setFabOpen(false);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }}
+              className={[
+                "mt-2 flex items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-900 shadow-xl hover:bg-neutral-50",
+                "focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-900/15",
+                "w-10 h-10 sm:w-14 sm:h-14",
+                showTop ? "opacity-100" : "pointer-events-none opacity-40",
+              ].join(" ")}
+              aria-label="Scroll to top"
+              type="button"
+              disabled={!showTop}
+            >
+              <ArrowUpIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
+          </div>
+        </>
+      )}
 
       <Lightbox open={!!lightboxItem} item={lightboxItem} onClose={() => setLightboxItem(null)} />
     </div>
