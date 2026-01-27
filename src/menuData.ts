@@ -132,7 +132,7 @@ export const items: Item[] = [
   {
     id: "pork-bbq-4",
     category: "PORK BBQ",
-    nameKo: "꽃 삼겹살",
+    nameKo: "꽃삼겹살",
     name: "KKOT SAMGYEOPSAL",
     desc: "Thinly sliced pork belly",
     image: { src: publicUrl("menu/pork/kkot-samgyeopsal.webp"), alt: "KKOT SAMGYEOPSAL" },
@@ -141,7 +141,7 @@ export const items: Item[] = [
   {
     id: "pork-bbq-5",
     category: "PORK BBQ",
-    nameKo: "고추장 삼겹살",
+    nameKo: "고추장삼겹살",
     name: "GOCHUJANG SAMGYEOPSAL",
     desc: "Pork belly marinated in spicy chili paste",
     image: { src: publicUrl("menu/pork/gochujang-samgyeopsal.webp"), alt: "GOCHUJANG SAMGYEOPSAL" },
@@ -191,7 +191,7 @@ export const items: Item[] = [
   {
     id: "other-bbq-3",
     category: "OTHER BBQ",
-    nameKo: "양념닭갈비",
+    nameKo: "양념 닭갈비",
     name: "YANGNYEOM DAK GALBI",
     desc: "Chicken marinated in soy sauce",
     image: { src: publicUrl("menu/other/yangnyeom-dak-galbi.webp"), alt: "YANGNYEOM DAK GALBI" },
@@ -211,7 +211,7 @@ export const items: Item[] = [
   {
     id: "hotpot-1",
     category: "HOTPOT",
-    nameKo: "돼지 전골",
+    nameKo: "돼지전골",
     name: "DWAEJI JEONGOL",
     desc: "5 different pork parts hot pot",
     image: { src: publicUrl("menu/hotpot/dwaeji-jeongol.webp"), alt: "DWAEJI JEONGOL" },
@@ -220,7 +220,7 @@ export const items: Item[] = [
   {
     id: "hotpot-2",
     category: "HOTPOT",
-    nameKo: "소꼬리 전골",
+    nameKo: "소꼬리전골",
     name: "SOKKORI JEONGOL",
     desc: "Oxtail and beef bone hot pot",
     image: { src: publicUrl("menu/hotpot/sokkori-jeongol.webp"), alt: "SOKKORI JEONGOL" },
@@ -238,7 +238,7 @@ export const items: Item[] = [
   {
     id: "hotpot-4",
     category: "HOTPOT",
-    nameKo: "김치 전골",
+    nameKo: "김치전골",
     name: "KIMCHI JEONGOL",
     desc: "Spicy hot pot with kimchi, pork,tofu, rice cake and sari (ramen noodles)",
     image: { src: publicUrl("menu/hotpot/kimchi-jeongol.webp"), alt: "KIMCHI JEONGOL" },
@@ -247,7 +247,7 @@ export const items: Item[] = [
   {
     id: "hotpot-5",
     category: "HOTPOT",
-    nameKo: "부대 전골",
+    nameKo: "부대전골",
     name: "BUDAE JEONGOL",
     desc: "Bone broth stew with ham, sausage, baked beans, vegetables and sari (ramen noodles)",
     image: { src: publicUrl("menu/hotpot/budae-jeongol.webp"), alt: "BUDAE JEONGOL" },
@@ -266,7 +266,7 @@ export const items: Item[] = [
   {
     id: "stew-1",
     category: "STEW",
-    nameKo: "돼지 국밥",
+    nameKo: "돼지국밥",
     name: "DWAEJI GUKBAP",
     desc: "Pork soup",
     tags: ["Best", "RECOMMENDED"],
@@ -294,7 +294,7 @@ export const items: Item[] = [
   {
     id: "stew-4",
     category: "STEW",
-    nameKo: "순두부 찌개",
+    nameKo: "순두부찌개",
     name: "SUNDUBU JJIGAE",
     desc: "Soft tofu simmered in a spicy broth with pork and vegetables",
     image: { src: publicUrl("menu/stew/sundubu-jjigae.webp"), alt: "SUNDUBU JJIGAE" },
@@ -303,7 +303,7 @@ export const items: Item[] = [
   {
     id: "stew-5",
     category: "STEW",
-    nameKo: "해물 순두부 찌개",
+    nameKo: "해물 순두부찌개",
     name: "HAEMUL SUNDUBU JJIGAE",
     desc: "Soft tofu simmered in a spicy broth with seafood and vegetables",
     image: { src: publicUrl("menu/stew/haemul-sundubu-jjigae.webp"), alt: "HAEMUL SUNDUBU JJIGAE" },
@@ -367,7 +367,7 @@ export const items: Item[] = [
   {
     id: "cheese-2",
     category: "CHEESE SERIES",
-    nameKo: "고구마 무스 닭갈비",
+    nameKo: "고구마무스 닭갈비",
     name: "GOGUMA MOUSSE DAK GALBI",
     desc: "Chicken marinated in spicy chili paste with sweet potato mousse",
     image: { src: publicUrl("menu/cheese/goguma-mousse-dak-galbi.webp"), alt: "GOGUMA MOUSSE DAK GALBI" },
@@ -531,7 +531,7 @@ export const items: Item[] = [
   {
     id: "rice-1",
     category: "RICE",
-    nameKo: "제육비빔밥",
+    nameKo: "제육 비빔밥",
     name: "JEYUK BIBIMBAP",
     desc: "Rice with spicy chili paste, various vegetables and spicy stir-fried pork in stone pot",
     image: { src: publicUrl("menu/rice/jeyuk-bibimbap.webp"), alt: "JEYUK BIBIMBAP" },
@@ -540,7 +540,7 @@ export const items: Item[] = [
   {
     id: "rice-2",
     category: "RICE",
-    nameKo: "돌솥비빔밥",
+    nameKo: "돌솥 비빔밥",
     name: "DOLSOT BIBIMBAP",
     desc: "Rice with spicy chili paste, various vegetables and a raw egg in stone pot",
     image: { src: publicUrl("menu/rice/dolsot-bibimbap.webp"), alt: "DOLSOT BIBIMBAP" },
@@ -622,7 +622,7 @@ export const items: Item[] = [
   {
     id: "noodles-4",
     category: "NOODLES",
-    nameKo: "김치말이국수",
+    nameKo: "김치말이 국수",
     name: "KIMCHIMARI GUKSU",
     desc: "Cold broth with kimchi and seaweed flakes",
     image: { src: publicUrl("menu/noodles/kimchimari-guksu.webp"), alt: "KIMCHIMARI GUKSU" },
@@ -649,7 +649,7 @@ export const items: Item[] = [
   {
     id: "noodles-7",
     category: "NOODLES",
-    nameKo: "산더미 국수",
+    nameKo: "산더미국수",
     name: "SANDUHMI GUKSU",
     desc: "Wheat flour noodles in a light anchovy broth topped with mountain like vegetables",
     tags: ["Best", "RECOMMENDED"],

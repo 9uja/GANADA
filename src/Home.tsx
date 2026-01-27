@@ -53,7 +53,6 @@ function CarouselNavButton({
       className={[
         "inline-flex items-center justify-center rounded-full",
         sizeClass,
-        // circle hidden + no icon
         "bg-transparent border border-transparent shadow-none",
         "transition active:scale-[0.98] hover:opacity-90",
         "focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-900/15",
@@ -65,27 +64,95 @@ function CarouselNavButton({
   );
 }
 
+/** prefers-reduced-motion 감지 */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("matchMedia" in window)) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => setReduced(!!mq.matches);
+    apply();
+
+    if ("addEventListener" in mq) {
+      mq.addEventListener("change", apply);
+      return () => mq.removeEventListener("change", apply);
+    }
+    // @ts-expect-error - legacy
+    mq.addListener?.(apply);
+    // @ts-expect-error - legacy
+    return () => mq.removeListener?.(apply);
+  }, []);
+
+  return reduced;
+}
+
+/** 모바일(sm 미만) 감지 */
+function useIsMobileSm() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("matchMedia" in window)) return;
+    // Tailwind sm = 640px
+    const mq = window.matchMedia("(max-width: 639px)");
+    const apply = () => setIsMobile(!!mq.matches);
+    apply();
+
+    if ("addEventListener" in mq) {
+      mq.addEventListener("change", apply);
+      return () => mq.removeEventListener("change", apply);
+    }
+    // @ts-expect-error - legacy
+    mq.addListener?.(apply);
+    // @ts-expect-error - legacy
+    return () => mq.removeListener?.(apply);
+  }, []);
+
+  return isMobile;
+}
+
 type Slide = {
   id: string;
-  imageSrc: string;
-  imageAlt: string;
-  href?: string; // external
-  to?: string; // internal
+  type: "image" | "video";
+  /** image면 이미지 경로, video면 mp4/webm 경로 */
+  src: string;
+  /** video 로딩 전 이미지(또는 fallback) */
+  poster?: string;
+  /** image일 때 alt */
+  alt?: string;
+  href?: string;
+  to?: string;
   ctaLabel?: string;
 };
 
-/** Top banner carousel (autoplay always ON, no play/pause) */
+/** Top banner carousel */
 function BannerCarousel({
   slides,
   autoMs = 5200,
+  videoHoldMs = 8000,
 }: {
   slides: Slide[];
   autoMs?: number;
+  videoHoldMs?: number;
 }) {
   const [idx, setIdx] = useState(0);
 
   const touchStartX = useRef<number | null>(null);
   const touchDeltaX = useRef(0);
+
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const isMobileSm = useIsMobileSm();
+
+  const active = slides[idx];
+  const isActiveVideo = active?.type === "video";
+
+  // ✅ 모바일/리듀스 모션이면 video → image fallback
+  const shouldVideoFallback = prefersReducedMotion || isMobileSm;
+
+  // ✅ 디버그: 주소창에 ?debugVideo=1 붙이면 controls 표시
+  const debugVideo =
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("debugVideo");
 
   const go = (next: number) => {
     const n = slides.length;
@@ -97,15 +164,23 @@ function BannerCarousel({
   const prev = () => go(idx - 1);
   const next = () => go(idx + 1);
 
-  // autoplay (always)
+  /**
+   * ✅ 자동 슬라이드
+   * - reduced-motion이면 자동 넘김 OFF
+   * - 비디오는 videoHoldMs(예: 8초) 머무르고 다음으로
+   * - 이미지는 autoMs
+   */
   useEffect(() => {
     if (slides.length <= 1) return;
-    const t = window.setInterval(
-      () => setIdx((v) => (v + 1) % slides.length),
-      autoMs
-    );
-    return () => window.clearInterval(t);
-  }, [slides.length, autoMs]);
+    if (prefersReducedMotion) return;
+
+    const dwellMs = isActiveVideo ? videoHoldMs : autoMs;
+    const t = window.setTimeout(() => {
+      setIdx((v) => (v + 1) % slides.length);
+    }, dwellMs);
+
+    return () => window.clearTimeout(t);
+  }, [slides.length, prefersReducedMotion, isActiveVideo, autoMs, videoHoldMs]);
 
   // keyboard
   useEffect(() => {
@@ -117,8 +192,6 @@ function BannerCarousel({
     return () => window.removeEventListener("keydown", onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, slides.length]);
-
-  const active = slides[idx];
 
   const Cta = ({ className = "" }: { className?: string }) => {
     if (!active?.ctaLabel) return null;
@@ -146,6 +219,87 @@ function BannerCarousel({
       );
     }
     return null;
+  };
+
+  const VideoSlide = ({
+    s,
+    isActive,
+  }: {
+    s: Slide;
+    isActive: boolean;
+  }) => {
+    const [failed, setFailed] = useState(false);
+    const ref = useRef<HTMLVideoElement | null>(null);
+
+    // ✅ 활성화 시 재생 보강 (autoplay가 간헐적으로 막히는 케이스)
+    useEffect(() => {
+      if (!isActive) return;
+      if (shouldVideoFallback) return;
+      if (failed) return;
+
+      const el = ref.current;
+      if (!el) return;
+
+      // 안전장치
+      el.muted = true;
+      el.playsInline = true;
+
+      const p = el.play();
+      if (p && typeof p.catch === "function") {
+        p.catch(() => {
+          // 여기로 떨어지면 코덱/정책/서빙 이슈 가능성이 큼
+          setFailed(true);
+        });
+      }
+    }, [isActive, shouldVideoFallback, failed]);
+
+    // ✅ fallback 조건이거나 재생 실패 시 poster로
+    if (shouldVideoFallback || failed) {
+      return (
+        <img
+          src={publicUrl(s.poster ?? "home/banners/video-fallback.webp")}
+          alt={s.alt ?? "Banner"}
+          className="h-full w-full object-cover"
+          loading={isActive ? "eager" : "lazy"}
+          decoding="async"
+          draggable={false}
+        />
+      );
+    }
+
+    // ✅ 비활성일 때는 CPU/네트워크 낭비 방지를 위해 poster만 보여줌
+    if (!isActive) {
+      return (
+        <img
+          src={publicUrl(s.poster ?? "home/banners/video-fallback.webp")}
+          alt={s.alt ?? "Banner"}
+          className="h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+          draggable={false}
+        />
+      );
+    }
+
+    return (
+      <video
+        // idx 변경 시 재마운트 → 일부 환경에서 autoplay 안정화
+        key={`video-${s.id}-${idx}`}
+        ref={(el) => {
+          ref.current = el;
+        }}
+        className="h-full w-full object-cover"
+        src={publicUrl(s.src)}
+        poster={s.poster ? publicUrl(s.poster) : undefined}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        controls={debugVideo}
+        onError={() => setFailed(true)}
+      />
+    );
   };
 
   // 최상단 배너 캐러셀
@@ -183,22 +337,28 @@ function BannerCarousel({
                 <div
                   key={s.id}
                   className={[
-                    "absolute inset-0 transition-opacity duration-500",
+                    "absolute inset-0",
+                    prefersReducedMotion ? "" : "transition-opacity duration-500",
                     isActive ? "opacity-100" : "opacity-0 pointer-events-none",
                   ].join(" ")}
                 >
-                  <img
-                    src={publicUrl(s.imageSrc)}
-                    alt={s.imageAlt}
-                    className="h-full w-full object-cover"
-                    loading={isActive ? "eager" : "lazy"}
-                    decoding="async"
-                    draggable={false}
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display =
-                        "none";
-                    }}
-                  />
+                  {s.type === "video" ? (
+                    <VideoSlide s={s} isActive={isActive} />
+                  ) : (
+                    <img
+                      src={publicUrl(s.src)}
+                      alt={s.alt ?? ""}
+                      className="h-full w-full object-cover"
+                      loading={isActive ? "eager" : "lazy"}
+                      decoding="async"
+                      draggable={false}
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display =
+                          "none";
+                      }}
+                    />
+                  )}
+
                   <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-black/15" />
                 </div>
               );
@@ -223,7 +383,7 @@ function BannerCarousel({
               </div>
             </div>
 
-            {/* ✅ dots + 1/3 제거 → CTA만 유지 */}
+            {/* CTA 유지 */}
             <div className="absolute bottom-0 left-0 right-0">
               <div className="mx-auto flex max-w-6xl justify-end px-4 pb-4 pt-3 sm:pb-5">
                 <Cta />
@@ -238,13 +398,13 @@ function BannerCarousel({
 
 /**
  * ✅ 추천메뉴
- * - 모바일(sm:hidden): 1개씩 보임 + 1개씩 슬라이드 + 자동슬라이드(1초)
- * - 데스크탑(sm:block): 2개씩 보임(페이지당 2개) + 2개씩 슬라이드(페이지 단위) + 자동슬라이드(1초)
- * - 투명 버튼(CarouselNavButton) 제거 금지: 모바일/데스크탑 모두 유지
+ * - 모바일(sm:hidden): 1개씩 보임 + 1개씩 슬라이드 + 자동슬라이드
+ * - 데스크탑(sm:block): 2개씩 보임 + 2개씩 슬라이드 + 자동슬라이드
+ * - 투명 버튼(CarouselNavButton) 제거 금지
  */
 function RecommendedMenuCarousel({
   list,
-  autoMs = 3000, // ✅ 초당 n번 자동 슬라이드
+  autoMs = 3000,
 }: {
   list: Item[];
   autoMs?: number;
@@ -295,7 +455,6 @@ function RecommendedMenuCarousel({
   const prevDesktop = () => goDesktop(dPage - 1);
   const nextDesktop = () => goDesktop(dPage + 1);
 
-  // 데스크탑 자동 슬라이드: 페이지 단위(=2개씩 이동)
   useEffect(() => {
     if (pages.length <= 1) return;
     const t = window.setInterval(() => {
@@ -304,7 +463,6 @@ function RecommendedMenuCarousel({
     return () => window.clearInterval(t);
   }, [pages.length, autoMs]);
 
-  // list/paging 변경 시 index 안전 보정
   useEffect(() => {
     if (mIdx >= list.length) setMIdx(0);
   }, [list.length, mIdx]);
@@ -315,23 +473,18 @@ function RecommendedMenuCarousel({
 
   return (
     <section className="bg-white p-6 shadow-sm sm:p-8">
-      {/* ✅ 헤더: 버튼 유무와 관계없이 제목을 '화면 기준 정중앙'으로 고정 */}
       <div className="grid items-center gap-3 sm:grid-cols-[1fr_auto_1fr]">
-        {/* left spacer (desktop에서만 균형용) */}
         <div className="hidden sm:block" />
-
         <h2 className="text-center text-2xl font-extrabold tracking-tight text-neutral-900 sm:text-2xl">
           RECOMMENDED
         </h2>
-
-        {/* Desktop buttons (icon removed) - 제거 금지 */}
         <div className="hidden items-center justify-end gap-2 sm:flex">
           <CarouselNavButton ariaLabel="이전" onClick={prevDesktop} size="sm" />
           <CarouselNavButton ariaLabel="다음" onClick={nextDesktop} size="sm" />
         </div>
       </div>
 
-      {/* ---------------- MOBILE (1개씩) ---------------- */}
+      {/* MOBILE */}
       <div className="relative mt-5 sm:hidden flex justify-center">
         <div
           className="relative w-full max-w-[720px] overflow-hidden rounded-3xl border border-neutral-200 bg-white"
@@ -393,7 +546,6 @@ function RecommendedMenuCarousel({
           </div>
         </div>
 
-        {/* 모바일 좌/우 버튼 유지 (제거 금지) */}
         <div className="pointer-events-none absolute inset-y-0 left-0 right-0 z-10 flex items-center justify-between">
           <div className="pointer-events-auto -translate-x-[40%]">
             <CarouselNavButton ariaLabel="이전" onClick={prevMobile} size="sm" />
@@ -404,7 +556,7 @@ function RecommendedMenuCarousel({
         </div>
       </div>
 
-      {/* ---------------- DESKTOP (2개씩, 2개씩 슬라이드) ---------------- */}
+      {/* DESKTOP */}
       <div className="relative mt-5 hidden sm:flex justify-center">
         <div className="w-full max-w-5xl overflow-hidden rounded-3xl bg-white">
           <div
@@ -450,7 +602,6 @@ function RecommendedMenuCarousel({
                     </Link>
                   ))}
 
-                  {/* 홀수 개수 보정(2칸 유지) */}
                   {page.length === 1 && (
                     <div className="rounded-3xl border border-transparent p-3" />
                   )}
@@ -467,14 +618,34 @@ function RecommendedMenuCarousel({
 export default function Home() {
   const slides: Slide[] = useMemo(
     () => [
-      { id: "b1", imageSrc: "home/banners/01.webp", imageAlt: "Banner 1", to: "/promos" },
-      { id: "b2", imageSrc: "home/banners/02.webp", imageAlt: "Banner 2", to: "/menu" },
-      { id: "b3", imageSrc: "home/banners/03.webp", imageAlt: "Banner 3", href: "https://wa.me/60123456789" },
+      {
+        id: "heroV",
+        type: "video",
+        src: "home/banners/01.mp4",
+        poster: "home/banners/01.webp",
+        alt: "Hero banner",
+        to: "/menu",
+        ctaLabel: "Menu",
+      },
+      {
+        id: "b2",
+        type: "image",
+        src: "home/banners/02.webp",
+        alt: "Banner 2",
+        to: "/menu",
+      },
+      {
+        id: "b3",
+        type: "image",
+        src: "home/banners/03.webp",
+        alt: "Banner 3",
+        href: "https://wa.me/60123456789",
+        ctaLabel: "WhatsApp",
+      },
     ],
     []
   );
 
-  // RECOMMENDED tagged items auto
   const bestList = useMemo(() => {
     const best = items.filter((it) => it.tags?.includes("RECOMMENDED"));
     return best.length > 0 ? best : items.slice(0, 10);
@@ -483,13 +654,12 @@ export default function Home() {
   return (
     <div className="space-y-8">
       <FullBleed>
-        <BannerCarousel slides={slides} />
+        <BannerCarousel slides={slides} autoMs={5200} videoHoldMs={8000} />
       </FullBleed>
 
-      {/* ✅ 추천메뉴만 변경됨 */}
       <RecommendedMenuCarousel list={bestList} autoMs={3000} />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-3 px-6">
         <Link
           to="/menu"
           className="group rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"

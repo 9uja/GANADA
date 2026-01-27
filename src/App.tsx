@@ -172,7 +172,7 @@ function AnimatedMenuIcon({
 function ActiveTriStrokeBar() {
   return (
     <span
-      className="pointer-events-none absolute bottom-[-1px] h-[6px] overflow-hidden rounded-full"
+      className="pointer-events-none absolute bottom-[-1px] h-[6px] overflow-hidden"
       style={{ left: -12, right: -12 }}
     >
       <span className="flex h-full w-full">
@@ -203,8 +203,6 @@ const desktopNavItem = ({ isActive }: { isActive: boolean }) =>
     "text-2xl font-extrabold tracking-tight transition",
     isActive ? "text-neutral-950" : "text-neutral-700 hover:text-neutral-950",
   ].join(" ");
-
-
 
 const mobileNavItem = ({ isActive }: { isActive: boolean }) =>
   [
@@ -317,12 +315,10 @@ export default function App() {
                 className={[
                   // ✅ hover 시 "배경만" 반전(다크), 아이콘 3색은 그대로 유지
                   "group inline-flex h-12 w-12 items-center justify-center rounded-2xl",
-                  "bg-white text-neutral-900",
-                  "ring-1 ring-neutral-200 shadow-sm",
+                  "bg-white text-neutral-800",
+                  "ring-0 ring-neutral-200 shadow-sm",
                   "transition-all duration-200 ease-out",
-                  "hover:bg-neutral-900 hover:text-white hover:shadow-md hover:ring-neutral-900/30",
                   "active:scale-[0.98]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900 focus-visible:ring-offset-2",
                   "md:hidden",
                 ].join(" ")}
                 aria-label={mobileNavOpen ? "Close menu" : "Open menu"}
@@ -384,19 +380,51 @@ export default function App() {
         </ContentWrap>
       </main>
 
-      {!isQr && (
-        <footer className="border-t border-neutral-200 bg-white px-4 py-10 text-sm text-neutral-600">
-          <div className="mx-auto max-w-6xl">
-            <div className="flex flex-col gap-1">
-              <div className="font-semibold text-neutral-800">GANADA Korean BBQ Restaurant</div>
-              <div>Malaysia</div>
-              <div className="mt-2 text-xs text-neutral-500">
-                © {new Date().getFullYear()} GANADA. All rights reserved.
+        {!isQr && (
+          <footer className="bg-neutral-800 px-4 py-6 text-sm text-neutral-100">
+            <div className="mx-auto max-w-6xl">
+              {/* 3 columns */}
+              <div className="grid gap-2">
+                {/* 1) Left: logo -> home (헤더 로고와 동일한 형태) */}
+                <div className="flex flex-col gap-2">
+                  <Link to="/" aria-label="Go to home" className="block w-fit">
+                    {/* 헤더에서 쓰는 로고와 동일 */}
+                    <img
+                      src={publicUrl("/brand/logo-mark.svg")} // ✅ 헤더에서 쓰는 경로/함수 그대로 사용
+                      alt="GANADA"
+                      className="h-12 w-12 bg-white"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </Link>
+                </div>
+
+                {/* 2) Middle: quick links */}
+                <div className="border-t border-white/10 pt-5">
+                  <div className="text-xs font-bold uppercase tracking-wider text-neutral-300">
+                    가나다 | 대표: 윤선규 | 전화주문: +60 3-2856 6183
+                  </div>
+                </div>
+
+                {/* 3) Right: policy + whatsapp */}
+                <div className="border-t border-white/10 pt-3">
+                  <div className="space-y-1">
+                    <div>
+                      <div className="mb-2 text-xs font-bold uppercase tracking-wider text-neutral-300">
+                        GANADA Korean BBQ Restaurant
+                      </div>
+                      <div className="text-neutral-300">Malaysia</div>
+                      <div className="pt-2 text-xs text-neutral-400">
+                        COPYRIGHT © {new Date().getFullYear()} ALL RIGHTS RESERVED BY GANADA's.
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </footer>
-      )}
+          </footer>
+        )}
+
     </div>
   );
 }

@@ -472,7 +472,7 @@ export default function Menu() {
 
           <button
             onClick={onScrollRight}
-            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/95 shadow-sm hover:bg-white"
+            className="absolute right-0 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full shadow-sm"
             type="button"
             aria-label="Scroll categories right"
           >
@@ -491,7 +491,7 @@ export default function Menu() {
             type="button"
           >
             {/* ✅ 3색 얇은 테두리 */}
-            <div className={["rounded-3xl p-[1px] shadow-sm transition group-hover:shadow-md", cardTriBorder].join(" ")}>
+            <div className={["rounded-3xl p-[1px] shadow-sm transition group-hover:shadow-lg", cardTriBorder].join(" ")}>
               {/* ✅ 실제 카드 */}
               <div className="overflow-hidden rounded-3xl bg-white">
                 <div className="aspect-[4/3] w-full overflow-hidden bg-white">
@@ -549,8 +549,8 @@ export default function Menu() {
                     </div>
                   )}
 
-                  <p className="mt-2 text-xs font-semibold text-neutral-500">
-                    Tap to view photo
+                  <p className="mt-2 text-xs font-semibold text-neutral-400">
+                    Tap to view
                   </p>
                 </div>
               </div>
@@ -560,7 +560,7 @@ export default function Menu() {
       </div>
 
       {showMarketNote && (
-        <p className="mt-6 px-2 text-xs leading-relaxed text-neutral-600 sm:px-6">
+        <p className="mt-6 px-2 text-xs leading-relaxed text-neutral-100 sm:px-6">
           BBQ items may be market price. Please ask our staff for today&apos;s price.
           <br />
           • All prices are subjected to 10% service charge.
@@ -663,7 +663,7 @@ export default function Menu() {
                 "flex items-center justify-center rounded-full border border-neutral-200 shadow-xl",
                 "focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-900/15",
                 // 요청: 데스크톱 56, 모바일 40 (Tailwind로 근사 + px로 정확)
-                "h-[40px] w-[40px] sm:h-[56px] sm:w-[56px]",
+                "h-[56px] w-[56px] sm:h-[56px] sm:w-[56px]",
                 "transition duration-200 ease-out",
                 fabOpen ? "bg-white text-neutral-900" : `border-transparent ${categoryAccentClass(active)}`,
               ].join(" ")}
@@ -675,7 +675,7 @@ export default function Menu() {
               ) : (
                 <CategoryIcon
                   c={active}
-                  className="h-5 w-5 sm:h-6 sm:w-6"
+                  className="h-7 w-7 sm:h-6 sm:w-6"
                   colorClass="bg-white"
                 />
               )}
@@ -690,14 +690,14 @@ export default function Menu() {
               className={[
                 "mt-2 flex items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-900 shadow-xl hover:bg-neutral-50",
                 "focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-900/15",
-                "h-[40px] w-[40px] sm:h-[56px] sm:w-[56px]",
+                "h-[56px] w-[56px] sm:h-[56px] sm:w-[56px]",
                 showTop ? "opacity-100" : "pointer-events-none opacity-40",
               ].join(" ")}
               aria-label="Scroll to top"
               type="button"
               disabled={!showTop}
             >
-              <ArrowUpIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+              <ArrowUpIcon className="h-6 w-6 sm:h-6 sm:w-6" />
             </button>
           </div>
         </>
