@@ -739,7 +739,7 @@ export default function Home() {
 
       <RecommendedMenuCarousel list={bestList} autoMs={3000} />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-3 px-6">
         <Link
           to="/menu"
           className="group rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
