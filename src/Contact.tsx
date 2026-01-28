@@ -15,17 +15,17 @@ export default function Contact() {
           <div className="mt-4 flex flex-wrap gap-2">
             <a
               className="rounded-full border border-neutral-500 px-4 py-2 text-sm hover:bg-neutral-900"
-              href="https://wa.me/600328566183"
+              href="tel:+60328566183"
               target="_blank"
               rel="noreferrer"
             >
-              WhatsApp
+              Call to order
             </a>
             <a
               className="rounded-full border border-neutral-500 px-4 py-2 text-sm hover:bg-neutral-900"
-              href="tel:+600328566183"
+              href="tel:+60328566183"
             >
-              Call
+              Call to order
             </a>
           </div>
         </div>

@@ -301,11 +301,11 @@ export default function App() {
                 <a
                   className="inline-flex h-10 items-center justify-center rounded-full px-5 text-base font-extrabold text-white transition-opacity hover:opacity-90"
                   style={{ backgroundColor: "#25D366" }}
-                  href="https://wa.me/600328566183"
+                  href="tel:+60328566183"
                   target="_blank"
                   rel="noreferrer"
                 >
-                  WhatsApp
+                  Call to order
                 </a>
               </div>
 
@@ -357,11 +357,11 @@ export default function App() {
                 <a
                   className="mt-4 inline-flex h-12 w-full items-center justify-center rounded-2xl text-base font-extrabold text-white transition-opacity hover:opacity-90"
                   style={{ backgroundColor: "#25D366" }}
-                  href="https://wa.me/600328566183"
+                  href="tel:+60328566183"
                   target="_blank"
                   rel="noreferrer"
                 > 
-                  WhatsApp
+                  Call to order
                 </a>
               </div>
             </div>
