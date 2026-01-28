@@ -946,6 +946,10 @@ export default function Menu() {
                       {cartCount === 0 ? "Empty" : `${cartCount} items`}
                     </p>
                   </div>
+                  <p className="flex-1 px-2 text-center text-[11px] font-semibold leading-tight text-neutral-500">
+                    The cart is for reviewing<br />
+                    your selected items only.
+                  </p>
 
                   <button
                     onClick={() => setCartOpen(false)}
@@ -1045,31 +1049,29 @@ export default function Menu() {
                     >
                       <span className="text-sm font-extrabold">Clear</span>
                     </button>
-
+                    <div className="flex min-h-[56px] items-center justify-center">
+                      <p className="text-center text-xs font-semibold text-red-500 leading-relaxed">
+                        Please place your order<br />
+                        with our staff.
+                      </p>
+                    </div>
                     <button
                       onClick={() => {
                         setCartPageOpen(true);
                       }}
                       className={[
-                        "flex-1 rounded-2xl px-3 py-3 text-left",
+                        "flex-1 rounded-2xl px-3 py-3",
                         "bg-neutral-900 text-white shadow-sm hover:bg-neutral-800 active:scale-[0.99]",
                         "focus:outline-none focus-visible:ring-4 focus-visible:ring-neutral-900/20",
                         cartCount === 0 ? "opacity-50 pointer-events-none" : "",
                       ].join(" ")}
                       type="button"
-                      aria-label="View cart total"
+                      aria-label="View cart"
                       disabled={cartCount === 0}
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm font-extrabold">Total</span>
-                        <span className="text-sm font-extrabold">RM {cartTotals.totalRm.toFixed(2)}</span>
-                      </div>
-                      {cartTotals.hasMarket && (
-                        <div className="mt-1 text-xs font-semibold text-white/80">
-                          Market price items are not included in the total.
-                        </div>
-                      )}
-                      <div className="mt-1 text-xs font-semibold text-white/80">View cart</div>
+                      <span className="block text-center text-sm font-extrabold">
+                        View cart
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -1331,6 +1333,13 @@ export default function Menu() {
             </div>
 
             <div className="border-t border-neutral-200 px-4 py-4">
+              <p className="mb-2 text-center text-sm font-semibold text-neutral-500 leading-relaxed">
+                The cart is for reviewing your selected items only.<br />
+                <span className="text-red-500">
+                  Please place your order with our staff.
+                </span>
+              </p>
+
               <div className="flex items-center justify-between gap-3">
                 <span className="text-sm font-extrabold text-neutral-900">Total</span>
                 <span className="text-sm font-extrabold text-neutral-900">RM {cartTotals.totalRm.toFixed(2)}</span>
