@@ -599,7 +599,7 @@ export const items: Item[] = [
     name: "DEULGIREUM MAKGUKSU",
     desc: "Buckwheat noodles mixed with perilla oil",
     image: { src: publicUrl("menu/noodles/deulgireum-makguksu.webp"), alt: "DEULGIREUM MAKGUKSU" },
-    price: { kind: "fixed", rm: 30 },
+    price: { kind: "fixed", rm: 25 },
   },
   {
     id: "noodles-2",
@@ -608,7 +608,7 @@ export const items: Item[] = [
     name: "MUL NAENGMYEON",
     desc: "Chilled buckwheat noodles.\nserved in beef broth",
     image: { src: publicUrl("menu/noodles/mul-naengmyeon.webp"), alt: "MUL NAENGMYEON" },
-    price: { kind: "fixed", rm: 30 },
+    price: { kind: "fixed", rm: 25 },
   },
   {
     id: "noodles-3",
@@ -618,8 +618,8 @@ export const items: Item[] = [
     desc: "Chilled buckwheat noodles mixed.\nin spicy sauce",
     tags: ["Spicy"],
     image: { src: publicUrl("menu/noodles/bibim-naengmyeon.webp"), alt: "BIBIM NAENGMYEON" },
-    price: { kind: "fixed", rm: 30 },
-  },
+    price: { kind: "fixed", rm: 25 },
+  }, 
   {
     id: "noodles-4",
     category: "NOODLES",
@@ -627,7 +627,7 @@ export const items: Item[] = [
     name: "KIMCHIMARI GUKSU",
     desc: "Cold broth with kimchi and seaweed flakes",
     image: { src: publicUrl("menu/noodles/kimchimari-guksu.webp"), alt: "KIMCHIMARI GUKSU" },
-    price: { kind: "fixed", rm: 30 },
+    price: { kind: "fixed", rm: 25 },
   },
   {
     id: "noodles-5",
@@ -636,7 +636,7 @@ export const items: Item[] = [
     name: "RAMYEON",
     desc: "Korean instant noodles with egg",
     image: { src: publicUrl("menu/noodles/ramyeon.webp"), alt: "RAMYEON" },
-    price: { kind: "fixed", rm: 30 },
+    price: { kind: "fixed", rm: 20 },
   },
   {
     id: "noodles-6",
@@ -645,7 +645,7 @@ export const items: Item[] = [
     name: "JANCHI GUKSU",
     desc: "Wheat flour noodles in a light anchovy broth",
     image: { src: publicUrl("menu/noodles/janchi-guksu.webp"), alt: "JANCHI GUKSU" },
-    price: { kind: "fixed", rm: 30 },
+    price: { kind: "fixed", rm: 19 },
   },
   {
     id: "noodles-7",
